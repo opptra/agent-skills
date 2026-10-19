@@ -13,6 +13,8 @@ Apps Script is not a choice. If the description only fits Apps Script, say so an
 
 ## Understand
 
+Try to read the Linear issue they named. If Linear is not connected, or they did not give an issue, stop. Tell them to connect Linear in Cursor or Claude. The issue is required for the purpose, and later for branches, commits, and pull requests. Do not invent a ticket id. Do not write `service.yaml` until the issue can be read.
+
 Ask what they want to build, in their words: what it does, and who uses it. Do not open with archetype names, part names, or auth codes. The developer may not know those words.
 
 Map what they said onto the choices below. Pick the recommended way yourself. You may recommend more than one component when the app needs it. You may add a recommendation they did not ask for when it fits what they described. Say why, in plain language, and put the technical value in parentheses. Do not invent an archetype that is not listed here.

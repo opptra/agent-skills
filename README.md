@@ -1,12 +1,13 @@
 # opptra/agent-skills
 
-The skills every Opptra developer uses to create an app, implement a feature, fix a bug, add a skill, and pull the latest skills.
+The skills every Opptra developer uses to create an app, implement a feature, fix a bug, align an existing app, add a skill, and pull the latest skills.
 
 | Skill | When |
 |---|---|
 | `create-app` | A new repository. It figures out the archetype and auth from a plain description, asks in everyday language when that is unclear, writes `service.yaml`, clones `main` of `opptra/sdlc-resources`, runs the generator, and deletes the clone. |
 | `feature` | A Linear feature. Branch `feat/<ticket>-<slug>` from `main`, OpenSpec, one pull request into `main`. |
 | `bug` | A Linear bug. A failing test, then the fix, one pull request into `main`. A design choice uses `feature`. |
+| `align-app` | An existing repository. It recommends what can be added now and researches later changes. It applies only the lines the developer accepts. |
 | `add-skill` | A new team skill. It writes `opptra/skills/<name>/SKILL.md` and opens a pull request into `main`. |
 | `update-skills` | Pull `main` of this repository and link every skill into Cursor, Claude Code, and Codex. |
 
