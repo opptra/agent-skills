@@ -5,6 +5,10 @@ description: Fixes a Linear bug with a failing test first, on a branch off main.
 
 # Bug
 
+Before you edit files, tell the developer what you will change and wait for a yes. Before a commit, show the message and the file list and wait. Before a push or a pull request, show the branch, title, and body and wait. Do not commit or push in the same turn as the code unless they already agreed.
+
+Read the Linear issue first. If Linear is not connected, stop. Tell the developer to connect Linear in Cursor or Claude. Do not invent a ticket id.
+
 If the fix needs a product or design choice, stop and follow the feature skill, including an OpenSpec.
 
 Otherwise:
