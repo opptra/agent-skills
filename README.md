@@ -1,6 +1,6 @@
 # opptra/agent-skills
 
-The skills every Opptra developer uses to create an app, implement a feature, fix a bug, add a skill, and pull the latest skills.
+The skills every Opptra developer uses to create an app, implement a feature, fix a bug, add a skill, change a skill, and fetch the latest skills.
 
 | Skill | When |
 |---|---|
@@ -8,7 +8,8 @@ The skills every Opptra developer uses to create an app, implement a feature, fi
 | `feature` | A Linear feature. Branch `feat/<ticket>-<slug>` from `main`, OpenSpec, one pull request into `main`. |
 | `bug` | A Linear bug. A failing test, then the fix, one pull request into `main`. A design choice uses `feature`. |
 | `add-skill` | A new team skill. It writes `opptra/skills/<name>/SKILL.md` and opens a pull request into `main`. |
-| `update-skills` | Pull `main` of this repository and link every skill into Cursor, Claude Code, and Codex. |
+| `modify-skill` | A change to an existing team skill. It edits that skill from the developer's instructions and opens a pull request into `main`. |
+| `fetch-skill` | Fetch `main` of this repository and link every skill into Cursor, Claude Code, and Codex. |
 
 `opptra/sdlc-resources` stays the library: the mapping, the skeletons, the generator, and the workflows. People do not keep that repo checked out.
 
@@ -31,4 +32,4 @@ for dir in ~/agent-skills/opptra/skills/*/; do
 done
 ```
 
-After that, ask the agent to update Opptra skills. The `update-skills` skill pulls `main` and refreshes those links, including skills added since the clone.
+After that, ask the agent to fetch Opptra skills. The `fetch-skill` skill pulls `main` and refreshes those links, including skills added since the clone.
