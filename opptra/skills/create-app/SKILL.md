@@ -17,7 +17,9 @@ Ask what they want to build, in their words: what it does, and who uses it. Do n
 
 Map what they said onto the choices below. Pick the recommended way yourself. You may recommend more than one component when the app needs it. You may add a recommendation they did not ask for when it fits what they described. Say why, in plain language, and put the technical value in parentheses. Do not invent an archetype that is not listed here.
 
-If you are not sure what is being created, ask more questions until you are. Ask one thing at a time, in everyday language, using the plain wording below. Stop asking when the parts, the archetype, and the auth are clear.
+If you are not sure what is being created, ask until you are. Ask one thing at a time. Do not end the turn with a bare question in the message.
+
+For each question, choose the probable answers from what they already said. Offer those as options, in everyday language, using the plain wording below. Offer only the answers that are still plausible. In Cursor, use the structured question tool and put only those probable answers in the options. Do not add your own write-in option; the form already lets them type one. On any other tool, add a last option that tells them to type their own answer. Do not also paste the question as plain text. Skip a question when the answer is already clear.
 
 ### What runs
 
@@ -38,13 +40,13 @@ Only a `cloud-run-service` has auth. Ask this only when you cannot tell from wha
 
 ### Names
 
-Also collect the app name, the production GCP project, and the region. Ask in plain language: what to call the app, which production project pays for it, and where it should run. The region default is `asia-south1`. Offer that default instead of making them invent a region.
+Also collect the app name, the production GCP project, and the region. Ask each one the same way: probable options from what they said, plus a write-in. For the region, include `asia-south1` as the usual choice. For the app name, include a short lowercase suggestion when you can make one from their description.
 
 The app name matches `^[a-z][a-z0-9-]{1,48}$`. Each component name matches `^[a-z][a-z0-9-]{1,40}$`. If their name does not match, suggest a short lowercase name with hyphens and use that after they agree.
 
 ## Recommendation
 
-Say what you will create in a few plain sentences: what it is, who can use it, and why this shape fits. Put each component, archetype, and auth in parentheses. Mention any extra recommendation the same way. Wait until the developer agrees. Do not write files before that.
+Say what you will create in a few plain sentences: what it is, who can use it, and why this shape fits. Put each component, archetype, and auth in parentheses. Mention any extra recommendation the same way. Then ask them to choose with the same kind of question: agree and create it, or change something. In Cursor the form already lets them type their own answer. Do not write files before they agree.
 
 ## Write
 
