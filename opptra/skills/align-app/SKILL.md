@@ -32,7 +32,11 @@ If the repo is Apps Script, say it is unsupported and stop. Do not change files.
 
 ### Add now
 
-List only the lines from `docs/align.md` that this repo can take without moving the running app. For each line, say why it fits and which files you would add. Skip a line that is already present.
+List the lines from **Add now** in `docs/align.md` that this repo still needs. For each line, say why it fits and which files you would write.
+
+Do not skip `AGENTS.md`, `CLAUDE.md`, or `.cursor/rules` because the file exists. Compare them with `$tmpdir/sdlc/rules/source/always.md`. Quote the missing sentences: commit format, Linear link, confirmations, feature-or-bug choice, and OpenSpec. Recommend replacing the stale files.
+
+Skip the README line only when it already has the purpose, the local run commands for the parts that exist, and the deploy steps.
 
 ### Later
 
@@ -45,7 +49,8 @@ Wait for the developer to choose which **Add now** lines to apply.
 Write only the accepted lines.
 
 - `service.yaml` at the repo root, using the facts you proposed.
-- `AGENTS.md`, `CLAUDE.md`, and `.cursor/rules` from `$tmpdir/sdlc/rules/source/` for the parts this repo has. Include `always`. Include `python`, `react`, `terraform`, `job`, `worker`, or `config` only when that part is present. Stamp `<!-- sdlc-rules-version: 1 -->` at the top of `AGENTS.md` and `CLAUDE.md`.
+- `AGENTS.md`, `CLAUDE.md`, and `.cursor/rules` from `$tmpdir/sdlc/rules/source/` for the parts this repo has. Include `always`. Include `python`, `react`, `terraform`, `job`, `worker`, or `config` only when that part is present. Replace stale copies when the developer accepts this line. Stamp `<!-- sdlc-rules-version: 1 -->` at the top of `AGENTS.md` and `CLAUDE.md`.
+- `README.md` with the purpose, local run commands for the parts that exist, and the deploy steps from `docs/align.md`. Replace a README that is missing those sections when the developer accepts this line.
 - A `.github/workflows/ci.yml` that runs on `pull_request` only and calls `opptra/sdlc-resources` at `main`: `python-ci.yml` when Python is present, `frontend-ci.yml` when a Vite or React UI is present, `config-ci.yml` when nothing runs. Keep any existing workflow files.
 - Create `staging` and `production` from `main` when those branches are missing. Do not protect `staging`.
 
