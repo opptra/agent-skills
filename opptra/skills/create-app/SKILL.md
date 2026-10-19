@@ -40,7 +40,7 @@ Only a `cloud-run-service` has auth. Ask this only when you cannot tell from wha
 
 ### Names
 
-Also collect the app name, the production GCP project, and the region. Ask each one the same way: probable options from what they said, plus a write-in. For the region, include `asia-south1` as the usual choice. For the app name, include a short lowercase suggestion when you can make one from their description.
+Also collect a one-line purpose, the app name, the production GCP project, and the region. The purpose is what the app is for, taken from the Linear issue, in one or two sentences on a single line. Ask each one the same way: probable options from what they said, plus a write-in. For the region, include `asia-south1` as the usual choice. For the app name, include a short lowercase suggestion when you can make one from their description.
 
 The app name matches `^[a-z][a-z0-9-]{1,48}$`. Each component name matches `^[a-z][a-z0-9-]{1,40}$`. If their name does not match, suggest a short lowercase name with hyphens and use that after they agree.
 
@@ -54,6 +54,7 @@ Write this shape. `cloud-run-service` requires `api`. Add `ui` only when there i
 
 ```yaml
 name: inventory
+purpose: Staff look up warehouse inventory from one page.
 prod_project: opptra-applications
 region: asia-south1
 components:
