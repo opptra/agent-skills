@@ -4,7 +4,7 @@ The skills every Opptra developer uses to create an app, implement a feature, fi
 
 | Skill | When |
 |---|---|
-| `create-app` | A new repository. It recommends the archetype and auth, writes `service.yaml`, clones `main` of `opptra/sdlc-resources`, runs the generator, and deletes the clone. |
+| `create-app` | A new repository. It figures out the archetype and auth from a plain description, asks in everyday language when that is unclear, writes `service.yaml`, clones `main` of `opptra/sdlc-resources`, runs the generator, and deletes the clone. |
 | `feature` | A Linear feature. Branch `feat/<ticket>-<slug>` from `main`, OpenSpec, one pull request into `main`. |
 | `bug` | A Linear bug. A failing test, then the fix, one pull request into `main`. A design choice uses `feature`. |
 | `add-skill` | A new team skill. It writes `opptra/skills/<name>/SKILL.md` and opens a pull request into `main`. |

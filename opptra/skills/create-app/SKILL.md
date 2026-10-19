@@ -1,6 +1,6 @@
 ---
 name: create-app
-description: Scaffolds a new Opptra app by recommending an archetype and auth, writing service.yaml, and running the generator from opptra/sdlc-resources. Use when a developer asks to create, scaffold, or set up a new app or repository.
+description: Scaffolds a new Opptra app by understanding a plain description, recommending an archetype and auth, writing service.yaml, and running the generator from opptra/sdlc-resources. Use when a developer asks to create, scaffold, or set up a new app or repository.
 ---
 
 # Create an app
@@ -11,28 +11,40 @@ Do not create the GitHub repository. Do not run `bind-repo.sh` or `protect-branc
 
 Apps Script is not a choice. If the description only fits Apps Script, say so and stop. If no archetype fits, name the closest one and stop.
 
-## Questions
+## Understand
 
-Ask what the app is for. Then ask, in order, and stop at the first match for each runnable part:
+Ask what they want to build, in their words: what it does, and who uses it. Do not open with archetype names, part names, or auth codes. The developer may not know those words.
 
-1. Config, prompts, or skills only, with no running service? Part `config`, archetype `config-only`, auth `none`.
-2. Work on a schedule or a queue, with no page a person waits on? Part `job`, archetype `cloud-run-job`, auth `none`.
-3. A real browser, a long-lived process, or a disk Cloud Run will not keep? Part `worker`, archetype `vm-worker`, auth `none`.
-4. A page or an API a person or another service calls? Part `api`, and `ui` when there is a page. Archetype `cloud-run-service`.
+Map what they said onto the choices below. Pick the recommended way yourself. You may recommend more than one component when the app needs it. You may add a recommendation they did not ask for when it fits what they described. Say why, in plain language, and put the technical value in parentheses. Do not invent an archetype that is not listed here.
 
-A console plus a scraper is two components in one `service.yaml`.
+If you are not sure what is being created, ask more questions until you are. Ask one thing at a time, in everyday language, using the plain wording below. Stop asking when the parts, the archetype, and the auth are clear.
 
-Auth is only for `cloud-run-service`:
+### What runs
 
-- Opptra staff, Google account, no separate password: `iap`
-- The app signs users in itself: `app-login`
-- Anyone on the internet, no account: `public`
+- Nothing runs. It is only settings, prompts, or skills. Part `config`, archetype `config-only`, auth `none`.
+- It does work on a schedule, or when a message arrives, and nobody is waiting on a page. Part `job`, archetype `cloud-run-job`, auth `none`.
+- It needs a real web browser, it has to stay running for a long time, or it saves files on a disk that a normal web app will not keep. Part `worker`, archetype `vm-worker`, auth `none`.
+- People open a page in a browser, or another system calls it and gets an answer. Part `api`, and `ui` when there is a page. Archetype `cloud-run-service`.
 
-Also collect the app name, the production GCP project, and the region. The region default is `asia-south1`. The app name matches `^[a-z][a-z0-9-]{1,48}$`. Each component name matches `^[a-z][a-z0-9-]{1,40}$`.
+A page people use, plus a separate job that collects data, is two components in one `service.yaml`.
+
+### Who can open a page or call the app
+
+Only a `cloud-run-service` has auth. Ask this only when you cannot tell from what they already said:
+
+- Only people who work at Opptra, using the Google account they already have: `iap`
+- People sign in with an account the app itself creates: `app-login`
+- Anyone on the internet, and they do not need an account: `public`
+
+### Names
+
+Also collect the app name, the production GCP project, and the region. Ask in plain language: what to call the app, which production project pays for it, and where it should run. The region default is `asia-south1`. Offer that default instead of making them invent a region.
+
+The app name matches `^[a-z][a-z0-9-]{1,48}$`. Each component name matches `^[a-z][a-z0-9-]{1,40}$`. If their name does not match, suggest a short lowercase name with hyphens and use that after they agree.
 
 ## Recommendation
 
-Say one sentence that names the components, the archetype, and the auth, and why. Wait until the developer agrees. Do not write files before that.
+Say what you will create in a few plain sentences: what it is, who can use it, and why this shape fits. Put each component, archetype, and auth in parentheses. Mention any extra recommendation the same way. Wait until the developer agrees. Do not write files before that.
 
 ## Write
 
