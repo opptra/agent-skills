@@ -7,7 +7,7 @@ description: Adds a new Opptra skill to the opptra/agent-skills repository and o
 
 A team skill is a folder in this repository at `opptra/skills/<name>/SKILL.md`. Cursor discovers it from that folder. Do not edit `.cursor-plugin/marketplace.json` or `opptra/.cursor-plugin/plugin.json` to register it.
 
-Do not write the skill into `~/.cursor/skills`, `~/.claude/skills`, `~/.codex/skills`, or `~/.cursor/skills-cursor`. Those are install locations. `update-skills` links them after the pull request is on `main`.
+Do not write the skill into `~/.cursor/skills`, `~/.claude/skills`, `~/.codex/skills`, or `~/.cursor/skills-cursor`. Those are install locations. `fetch-skill` links them after the pull request is on `main`.
 
 ## Ask
 
