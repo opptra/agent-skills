@@ -1,7 +1,7 @@
 {
   "name": "opptra",
   "version": "0.2.0",
-  "description": "Opptra skills for creating an app, implementing a feature, fixing a bug, adding a skill, and pulling the latest skills.",
+  "description": "Opptra skills for creating an app, implementing a feature, fixing a bug, adding a skill, changing a skill, and fetching the latest skills.",
   "author": {
     "name": "Opptra"
   },

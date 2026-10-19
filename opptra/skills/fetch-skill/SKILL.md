@@ -1,9 +1,9 @@
 ---
-name: update-skills
-description: Pulls the latest Opptra skills from github.com/opptra/agent-skills and links them for Cursor, Claude Code, and Codex. Use when a developer asks to update, pull, sync, or get the latest Opptra skills.
+name: fetch-skill
+description: Pulls the latest Opptra skills from github.com/opptra/agent-skills and links them for Cursor, Claude Code, and Codex. Use when a developer asks to fetch, pull, sync, update, or get the latest Opptra skills.
 ---
 
-# Update skills
+# Fetch skills
 
 Pull `main` from `https://github.com/opptra/agent-skills.git` and point each tool at the skill folders in that checkout. Do not merge, rebase, or discard local changes.
 
