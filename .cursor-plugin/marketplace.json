@@ -1,0 +1,16 @@
+{
+  "name": "opptra",
+  "owner": {
+    "name": "Opptra"
+  },
+  "metadata": {
+    "description": "Opptra agent skills for new apps, features, bugs, and skill updates."
+  },
+  "plugins": [
+    {
+      "name": "opptra",
+      "source": "opptra",
+      "description": "Create an app, implement a feature, fix a bug, add a skill, or pull the latest Opptra skills."
+    }
+  ]
+}
