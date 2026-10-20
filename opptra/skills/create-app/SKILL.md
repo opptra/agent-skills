@@ -40,6 +40,10 @@ Only a `cloud-run-service` has auth. Ask this only when you cannot tell from wha
 - People sign in with an account the app itself creates: `app-login`
 - Anyone on the internet, and they do not need an account: `public`
 
+### Stored data
+
+Ask whether the app stores data only when you cannot tell from what they already said. If it stores data, recommend `database: postgres` on that component. That is Cloud SQL, not a database on the VM. If it does not store data, use `database: none`. A config-only component cannot use a database.
+
 ### Names
 
 Also collect a one-line purpose, the app name, the production GCP project, and the region. The purpose is what the app is for, taken from the Linear issue, in one or two sentences on a single line. Ask each one the same way: probable options from what they said, plus a write-in. For the region, include `asia-south1` as the usual choice. For the app name, include a short lowercase suggestion when you can make one from their description.
@@ -63,6 +67,7 @@ components:
   - name: console
     archetype: cloud-run-service
     auth: iap
+    database: postgres
     parts: [ui, api]
 ```
 
