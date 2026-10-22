@@ -1,94 +1,152 @@
 ---
 name: create-app
-description: Scaffolds a new Opptra app by understanding a plain description, recommending an archetype and auth, writing service.yaml, and running the generator from opptra/sdlc-resources. Use when a developer asks to create, scaffold, or set up a new app or repository.
+description: Scaffolds a new Opptra app by reading the Linear issue and any local plan, inferring workloads and capabilities, writing service.yaml, and running the 5-phase generator from opptra/sdlc-resources. Use when a developer asks to create, scaffold, or set up a new app or repository.
 ---
 
 # Create an app
 
-You fill in facts. The generator in `opptra/sdlc-resources` decides the files, CI, deploy, and rules. Do not invent a pipeline, a framework, or an archetype that is not listed below.
+You fill in facts, run the deterministic phase scripts in `opptra/sdlc-resources`, and customize the application entrypoints, data helpers, and unit tests in between. The generator decides `infra/`, `.github/workflows/`, and the rule files. Never hand-edit `.github/workflows/` or `infra/`.
 
 Do not create the GitHub repository. Do not run `bind-repo.sh` or `protect-branches.sh`. Do not leave a checkout of `opptra/sdlc-resources` on the machine.
 
-Apps Script is not a choice. If the description only fits Apps Script, say so and stop. If no archetype fits, name the closest one and stop.
+Apps Script is not a choice. If the whole request is only Apps Script, say so and stop. When part of a request needs something the platform does not generate yet (such as project-level billing budgets or a data warehouse), scaffold every part the platform does support and record the gap under `unmet` in `service.yaml` with a clear recommendation.
 
 ## Understand
 
-Try to read the Linear issue they named. If Linear is not connected, or they did not give an issue, stop. Tell them to connect Linear in Cursor or Claude. The issue is required for the purpose, and later for branches, commits, and pull requests. Do not invent a ticket id. Do not write `service.yaml` until the issue can be read.
+1. Read the Linear issue they named. If Linear is not connected, or they did not give an issue, stop and ask them to connect Linear or share the ticket id. Do not invent a ticket id.
+2. Check the current directory for an existing architecture or migration plan (such as `MIGRATION_PLAN.md` or a design doc). Treat every decision already stated in that plan—region, jobs, crons, Firestore vs Postgres, buckets, queues, webhook receiver, secrets—as answered. Do not re-ask what the plan already fixed.
+3. For anything still undecided, ask one question at a time in plain language using the structured question tool in Cursor (probable options only; the form already provides a write-in).
 
-Ask what they want to build, in their words: what it does, and who uses it. Do not open with archetype names, part names, or auth codes. The developer may not know those words.
+### Workloads and presets
 
-Map what they said onto the choices below. Pick the recommended way yourself. You may recommend more than one component when the app needs it. You may add a recommendation they did not ask for when it fits what they described. Say why, in plain language, and put the technical value in parentheses. Do not invent an archetype that is not listed here.
+Map what they described onto the closest preset or component combination:
 
-If you are not sure what is being created, ask until you are. Ask one thing at a time. Do not end the turn with a bare question in the message.
+- **Nothing runs** (only settings, prompts, or skills): archetype `config-only`, auth `none`, parts `[config]`.
+- **One background job** on a schedule or queue: archetype `cloud-run-job`, auth `none`, parts `[job]`.
+- **Several scheduled jobs sharing one codebase/image, with an optional webhook receiver**: archetype `scheduled-jobs`, auth `none`, parts `[job]`, with a `jobs:` list (each with `name`, `command`, `enabled`, `timezone`, `schedules`, `timeout_seconds`, `memory`, `secrets`) and an optional `receiver:` (`name`, `auth: shared-secret`, `queue`, `secrets`). An HTTP portal login or tracking-page fetch stays on a job; do not move it to a VM.
+- **A real browser that must stay open, a long-lived process, or local disk state**: archetype `vm-worker`, auth `none`, parts `[worker]`.
+- **A page people open or an HTTP API**: archetype `cloud-run-service`, parts `[api]` (and `ui` when there is a page).
 
-For each question, choose the probable answers from what they already said. Offer those as options, in everyday language, using the plain wording below. Offer only the answers that are still plausible. In Cursor, use the structured question tool and put only those probable answers in the options. Do not add your own write-in option; the form already lets them type one. On any other tool, add a last option that tells them to type their own answer. Do not also paste the question as plain text. Skip a question when the answer is already clear.
+### Who can open a page or call the service
 
-### What runs
+- Opptra staff with their Google account: `iap`
+- Users sign in with an account the app manages: `app-login`
+- Another system calls a webhook with a secret header (such as Freshdesk): `shared-secret`
+- Anyone on the internet with no account: `public`
 
-- Nothing runs. It is only settings, prompts, or skills. Part `config`, archetype `config-only`, auth `none`.
-- It does work on a schedule, or when a message arrives, and nobody is waiting on a page. Part `job`, archetype `cloud-run-job`, auth `none`.
-- It needs a real web browser, it has to stay running for a long time, or it saves files on a disk that a normal web app will not keep. Part `worker`, archetype `vm-worker`, auth `none`.
-- People open a page in a browser, or another system calls it and gets an answer. Part `api`, and `ui` when there is a page. Archetype `cloud-run-service`.
+### Data, files, queues, and secrets
 
-A page people use, plus a separate job that collects data, is two components in one `service.yaml`.
+Infer these from the description or plan, and ask only when two choices are still plausible:
 
-### Who can open a page or call the app
-
-Only a `cloud-run-service` has auth. Ask this only when you cannot tell from what they already said:
-
-- Only people who work at Opptra, using the Google account they already have: `iap`
-- People sign in with an account the app itself creates: `app-login`
-- Anyone on the internet, and they do not need an account: `public`
-
-### Stored data
-
-Ask whether the app stores data only when you cannot tell from what they already said. If it stores data, recommend `database: postgres` on that component. That is Cloud SQL, not a database on the VM. If it does not store data, use `database: none`. A config-only component cannot use a database.
-
-### Names
-
-Also collect a one-line purpose, the app name, the production GCP project, and the region. The purpose is what the app is for, taken from the Linear issue, in one or two sentences on a single line. Ask each one the same way: probable options from what they said, plus a write-in. For the region, include `asia-south1` as the usual choice. For the app name, include a short lowercase suggestion when you can make one from their description.
-
-The app name matches `^[a-z][a-z0-9-]{1,48}$`. Each component name matches `^[a-z][a-z0-9-]{1,40}$`. If their name does not match, suggest a short lowercase name with hyphens and use that after they agree.
+- Relational rows, joins, or SQL: `database: postgres` (Cloud SQL Postgres 16)
+- Document collections, leases, idempotency keys, or a plan that specifies Firestore: `database: firestore` (the project's `(default)` Firestore database)
+- No stored state: `database: none`
+- Reports, manuals, exports, or uploaded files: `bucket: private`
+- Webhook bursts or queued background tasks: `queue: <queue-name>`
+- API keys, SMTP credentials, or portal logins: `secrets: [<secret_id>, ...]` (secret IDs only; never ask for or write secret values)
+- Job failure and error log alerting: `alerts: true`
 
 ## Recommendation
 
-Say what you will create in a few plain sentences: what it is, who can use it, and why this shape fits. Put each component, archetype, and auth in parentheses. Mention any extra recommendation the same way. Then ask them to choose with the same kind of question: agree and create it, or change something. In Cursor the form already lets them type their own answer. Do not write files before they agree.
+State what you will create in plain sentences: the workloads/jobs, who can call it, which data store, bucket, queue, and secret IDs it uses, and any item that will be recorded under `unmet` with its recommendation. Ask them to confirm before writing files.
 
-## Write
+## Execute the 5 Phases
 
-Write this shape. `cloud-run-service` requires `api`. Add `ui` only when there is a page. A job, a worker, and config are separate components.
-
-```yaml
-name: inventory
-purpose: Staff look up warehouse inventory from one page.
-prod_project: opptra-applications
-region: asia-south1
-components:
-  - name: console
-    archetype: cloud-run-service
-    auth: iap
-    database: postgres
-    parts: [ui, api]
-```
-
-Clone `main` of the library, generate into the current directory when it is empty, otherwise into `./<name>`, then delete the clone:
+Clone `main` of `opptra/sdlc-resources` into a temporary directory and clean it up when finished:
 
 ```bash
 tmpdir=$(mktemp -d)
 git clone --depth 1 --branch main https://github.com/opptra/sdlc-resources.git "$tmpdir/sdlc"
-python3 "$tmpdir/sdlc/scripts/check_manifest.py" "$tmpdir/service.yaml"
-python3 "$tmpdir/sdlc/scripts/generate.py" "$tmpdir/service.yaml" "<empty-directory>"
-rm -rf "$tmpdir"
 ```
 
-The generated tests already pass. A failing test for a Linear issue belongs on a feature branch, not in this scaffold.
+### Phase 1: Manifest (`check`)
 
-Tell the developer to create the empty `opptra/<name>` repository, copy this directory in, and push:
+Write `service.yaml` with `name`, `purpose`, `prod_project`, `region`, `components`, and any `unmet` items:
+
+```yaml
+name: cx-automation
+purpose: Run the customer-support automations in asia-south1.
+prod_project: opptra-applications
+region: asia-south1
+components:
+  - name: automation
+    archetype: scheduled-jobs
+    auth: none
+    database: firestore
+    bucket: private
+    queue: cx-tickets
+    alerts: true
+    parts: [job]
+    secrets: [freshdesk_opptra, smtp, webhook_secret]
+    receiver:
+      name: cx-webhook
+      auth: shared-secret
+      queue: cx-tickets
+      secrets: [webhook_secret]
+    jobs:
+      - name: report-daily
+        command: python -m app.jobs.report_daily
+        enabled: true
+        timezone: Asia/Kolkata
+        schedules: ["0 7,14 * * *"]
+        timeout_seconds: 1800
+        memory: 1Gi
+        secrets: [freshdesk_opptra, smtp]
+unmet:
+  - name: budget-alerts
+    need: Email billing alerts at $10, $20, and $30 monthly spend.
+    suggestion: Configure project billing budgets once via docs/gcp-bootstrap.md.
+```
+
+Validate it:
+
+```bash
+python3 "$tmpdir/sdlc/scripts/sdlc.py" check "$tmpdir/service.yaml"
+```
+
+### Phase 2: Runtime & Entrypoints (`init-runtime`)
+
+1. Run the script to scaffold the project structure, Dockerfile, and entrypoints:
+   ```bash
+   python3 "$tmpdir/sdlc/scripts/sdlc.py" init-runtime "$tmpdir/service.yaml" "<target-dir>" --overwrite
+   ```
+2. Customize the generated runtime files to match the user's domain (for example: add required OS packages like `tesseract-ocr` or `poppler-utils` to the `Dockerfile`, wire the job commands or initial API/UI routes, and scaffold any one-off migration CLI under `tools/`). Keep business logic migrations for `feature` PRs; scaffold the entrypoints and runner contract here.
+
+### Phase 3: Data, Storage & Secrets (`add-data`)
+
+1. Run the script to install the database, storage, queue, and secret packages and base helpers:
+   ```bash
+   python3 "$tmpdir/sdlc/scripts/sdlc.py" add-data "$tmpdir/service.yaml" "<target-dir>"
+   ```
+2. Shape the data/state wrappers in `backend/app/` to match the domain collections or tables described by the user or plan.
+
+### Phase 4: Tests (`add-tests`)
+
+1. Run the script to add the test configuration and capability test files:
+   ```bash
+   python3 "$tmpdir/sdlc/scripts/sdlc.py" add-tests "$tmpdir/service.yaml" "<target-dir>"
+   ```
+2. Add passing unit tests in `backend/tests/` covering the entrypoints and platform invariants (such as disabled jobs exiting 0, lease lock contention exiting 0, failed upstream fetches exiting non-zero, and webhook secret checks).
+3. Run the lint and test gate for each component (`uv run ruff check . && uv run pytest` for Python; `npm run lint && npm run typecheck && npm test --if-present` for UI) and fix any failure before moving to Phase 5.
+
+### Phase 5: Infra, Workflows & Rules (`sync-infra`)
+
+1. Run the script to generate `infra/`, `.github/workflows/`, `AGENTS.md`, `CLAUDE.md`, `.cursor/rules/*.mdc`, and `README.md`:
+   ```bash
+   python3 "$tmpdir/sdlc/scripts/sdlc.py" sync-infra "$tmpdir/service.yaml" "<target-dir>"
+   python3 "$tmpdir/sdlc/scripts/sdlc.py" status "<target-dir>" --check
+   rm -rf "$tmpdir"
+   ```
+2. Do not hand-edit `infra/` or `.github/workflows/`. If the project has domain-specific edge cases (such as Section 6 of a migration plan), add a domain rule file in `.cursor/rules/` and document the runbook in `README.md`.
+
+## Hand-off
+
+Tell the developer to create the empty `opptra/<name>` repository, push `main`, and create `staging` and `production`:
 
 ```bash
 git init
 git add .
-git commit -m "feat: scaffold"
+git commit -m "feat: <ticket-id> scaffold"
 git branch -M main
 git remote add origin git@github.com:opptra/<name>.git
 git push -u origin main
@@ -98,4 +156,4 @@ git push -u origin staging
 git push -u origin production
 ```
 
-Then they ask a platform owner to run `scripts/protect-branches.sh` and `scripts/bind-repo.sh` from `opptra/sdlc-resources`. Nothing has deployed yet.
+Then they ask a platform owner to run `scripts/protect-branches.sh` and `scripts/bind-repo.sh` from `opptra/sdlc-resources`.

@@ -1,18 +1,19 @@
 # opptra/agent-skills
 
-The skills every Opptra developer uses to create an app, implement a feature, fix a bug, align an existing app, add a skill, change a skill, and fetch the latest skills.
+The skills every Opptra developer uses to create an app, change an app's capabilities or schedules, implement a feature, fix a bug, align an existing app, add a skill, change a skill, and fetch the latest skills.
 
 | Skill | When |
 |---|---|
-| `create-app` | A new repository. It figures out the archetype and auth from a plain description, asks in everyday language when that is unclear, writes `service.yaml`, clones `main` of `opptra/sdlc-resources`, runs the generator, and deletes the clone. |
-| `feature` | A Linear feature. Branch `feat/<ticket>-<slug>` from `main`, OpenSpec, one pull request into `main`. |
-| `bug` | A Linear bug. A failing test, then the fix, one pull request into `main`. A design choice uses `feature`. |
-| `align-app` | An existing repository. It recommends what can be added now and researches later changes. It applies only the lines the developer accepts. |
-| `add-skill` | A new team skill. It writes `opptra/skills/<name>/SKILL.md` and opens a pull request into `main`. |
-| `modify-skill` | A change to an existing team skill. It edits that skill from the developer's instructions and opens a pull request into `main`. |
-| `fetch-skill` | Fetch `main` of this repository and link every skill into Cursor, Claude Code, and Codex. |
+| `create-app` | A new repository. Reads the Linear issue and any local plan (`MIGRATION_PLAN.md`), infers workloads and capabilities, records any platform gap under `unmet`, writes `service.yaml`, and runs the 5-phase generator (`check` → `init-runtime` → `add-data` → `add-tests` → `sync-infra`) from `opptra/sdlc-resources`. |
+| `change-app` | Adding or updating a workload, scheduled job, cron schedule, database (`postgres` or `firestore`), bucket, queue, or secret on an existing app. Updates `service.yaml`, runs `add-data` → `add-tests` → `sync-infra`, and opens an `infra/<ticket>-<slug>` pull request. |
+| `align-app` | An existing repository. Runs `sdlc.py status --json`, presents **Adopt now**, **Fill capability gaps**, and **Later recommendations**, and applies only the items the developer accepts. |
+| `feature` | A Linear feature. Verifies repo alignment and capability rules from `service.yaml`, branches `feat/<ticket>-<slug>` from `main`, writes an OpenSpec and tests, and opens one pull request into `main`. |
+| `bug` | A Linear bug. Verifies repo alignment and capability rules, writes a failing test first, makes the fix, and opens one pull request into `main`. |
+| `add-skill` | A new team skill. Writes `opptra/skills/<name>/SKILL.md` and opens a pull request into `main`. |
+| `modify-skill` | A change to an existing team skill. Edits that skill from the developer's instructions and opens a pull request into `main`. |
+| `fetch-skill` | Fetches `main` of this repository and links every skill into Cursor, Claude Code, and Codex. |
 
-`opptra/sdlc-resources` stays the library: the mapping, the skeletons, the generator, and the workflows. People do not keep that repo checked out.
+`opptra/sdlc-resources` stays the library: the mapping, the skeletons, the phase CLI (`scripts/sdlc.py`), the Terraform modules, and the workflows. People do not keep that repo checked out.
 
 `main` does not deploy. A push to `staging` deploys staging. A merge into `production` deploys production.
 
