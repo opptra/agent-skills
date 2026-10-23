@@ -60,7 +60,8 @@ Before writing any files, present the **14-Point Blueprint Table** so the develo
 | **11** | **Database, Warehouse & State** | `postgres`, `firestore`, `bigquery`, or `none` + `bucket` / `queue` |
 | **12** | **Authentication** | `iap`, `app-login`, `shared-secret`, `public`, or `none` |
 | **13** | **Observability & Alerts** | `/api/health` or job runner + JSON stdout logging + `alerts` |
-| **14** | **README & Runbook** | Local run, test commands, deploy steps, and `unmet` notes |
+| **14** | **README & Runbook** | Local run (`make setup`, `make dev`, `make test`), deploy steps, and `unmet` notes |
+| **15** | **Local Development & `.env.example`** | `.env.example` with all secrets/config + `Makefile` + `backend/app/config.py` local `.env` loader |
 
 Ask the developer to confirm before running the phases.
 
@@ -138,7 +139,12 @@ Say what was created: app name, directory, workloads, data store, bucket, queue,
 
 ### Next steps, in this order
 
-1. Ask whether the empty GitHub repository already exists. If they paste a URL now or in a later message, store it and push the three branches. Accept `https://github.com/org/repo`, `git@github.com:org/repo.git`, or `org/repo`.
+1. **Run and verify locally first (`make setup && make dev && make test`).**
+   The scaffold generated `.env.example`, `Makefile`, and `backend/app/config.py` (which reads `.env` when `APP_ENV=local` and Secret Manager in the cloud). Copy `.env.example` to `.env`, fill in any local test values, and run `make setup`, `make dev`, and `make test` on your machine before deploying.
+2. **Build your first feature slice locally with `/feature`.**
+   The scaffold is the platform shell. Port or build product behaviour one `/feature` pull request at a time.
+3. **Connect the empty GitHub repository when ready to push.**
+   Ask whether the empty GitHub repository already exists. If they paste a URL now or in a later message, store it and push the three branches. Accept `https://github.com/org/repo`, `git@github.com:org/repo.git`, or `org/repo`.
    ```bash
    python3 scripts/sdlc.py set-github-repo "<url>" .
    git init
@@ -153,10 +159,8 @@ Say what was created: app name, directory, workloads, data store, bucket, queue,
    git push -u origin production
    ```
    If `origin` already exists, use `git remote set-url origin "<url>"`. If a branch already exists on the remote, do not force-push. If they do not have a repository yet, stop this step and continue when they send the URL. Read `.sdlc/state.yaml` on a later turn so you do not re-ask the scaffold facts.
-2. Explain `scripts/bind-repo.sh` before anyone runs it. It lets GitHub Actions for this repository impersonate a deployer service account in the production project and in `opptra-staging`. That account can push the image and apply Terraform. The script does not deploy. A direct push to `staging` deploys staging. A pull request from `main` into `production` is the only deploy that comes from `main`. Do not merge `main` into `staging`. Branch protection is already an organization ruleset, so this script does not protect branches. The developer runs `scripts/bind-repo.sh` if they can change IAM in those projects. Otherwise they give that file to someone who can. Do not run it yourself unless they say they have permission and ask you to.
-3. After the bind script has succeeded, a developer pushes the branch they want to try directly to `staging` and reads the Terraform plan. Confirm the jobs, schedules, and webhook match `service.yaml`. A disabled job must have no Scheduler entry. Merging to `main` does not update staging.
-4. Put secret values into Secret Manager. The scaffold only created secret ids.
-5. Close each `unmet` item in its own pull request, highest risk first. A data import or a budget alert is this step, not a reason to re-run the scaffold.
-6. Port behaviour in `/feature` pull requests. One slice at a time. The scaffold does not include the product handlers.
+4. **Explain `scripts/bind-repo.sh` before anyone runs it.** It lets GitHub Actions for this repository impersonate a deployer service account in the production project and in `opptra-staging`. That account can push the image and apply Terraform. The script does not deploy. A direct push to `staging` deploys staging. A pull request from `main` into `production` is the only deploy that comes from `main`. Do not merge `main` into `staging`. Branch protection is already an organization ruleset, so this script does not protect branches. The developer runs `scripts/bind-repo.sh` if they can change IAM in those projects. Otherwise they give that file to someone who can. Do not run it yourself unless they say they have permission and ask you to.
+5. **Test on `staging`, then promote `main` to `production`.** After the bind script has succeeded, push the branch you want to try directly to `staging` and read the Terraform plan. Confirm the jobs, schedules, and webhook match `service.yaml`. A disabled job must have no Scheduler entry. Merging to `main` does not update staging.
+6. **Put secret values into Secret Manager and close `unmet` items.** The scaffold only created secret ids. Close each `unmet` item (such as a data import or project billing budget) in its own pull request.
 
 If those feature slices are already known, ask **once**: pause for review after each slice, or run each slice through its checks without stopping.

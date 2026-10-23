@@ -5,8 +5,9 @@ The skills every Opptra developer uses to create an app, change an app's capabil
 | Skill | When |
 |---|---|
 | `create-app` | A new repository. Reads the Linear issue and any local plan (`MIGRATION_PLAN.md`), infers workloads and capabilities, records any platform gap under `unmet`, writes `service.yaml`, and runs the 5-phase generator (`check` → `init-runtime` → `add-data` → `add-tests` → `sync-infra`) from `opptra/sdlc-resources`. |
-| `change-app` | Adding or updating a workload, scheduled job, cron schedule, database (`postgres` or `firestore`), bucket, queue, or secret on an existing app. Updates `service.yaml`, runs `add-data` → `add-tests` → `sync-infra`, and opens an `infra/<ticket>-<slug>` pull request. |
-| `align-app` | An existing repository. Runs `sdlc.py status --json`, presents **Adopt now**, **Fill capability gaps**, and **Later recommendations**, and applies only the items the developer accepts. |
+| `change-app` | Adding or updating a workload, scheduled job, cron schedule, database (`postgres`, `firestore`, `bigquery`), bucket, queue, or secret on an existing app. Updates `service.yaml`, runs `add-data` → `add-tests` → `sync-infra`, and opens an `infra/<ticket>-<slug>` pull request. |
+| `adopt-terraform` | Moving an existing app from `deploy.sh`, Cloud Build, Vercel, or manual GCP resources onto Terraform. Runs `sdlc.py discover-infra`, presents a Terraform Adoption Scorecard, and generates `service.yaml`, `infra/`, and declarative `imports.tf.example` blocks. |
+| `align-app` | An existing repository. Runs `sdlc.py status --table`, presents the 15-point scorecard and 10 rule pillars with **What this means for you**, and applies only the rows the developer accepts. |
 | `feature` | A Linear feature. Verifies repo alignment and capability rules from `service.yaml`, branches `feat/<ticket>-<slug>` from `main`, writes an OpenSpec and tests, and opens one pull request into `main`. |
 | `bug` | A Linear bug. Verifies repo alignment and capability rules, writes a failing test first, makes the fix, and opens one pull request into `main`. |
 | `add-skill` | A new team skill. Writes `opptra/skills/<name>/SKILL.md` and opens a pull request into `main`. |
