@@ -63,6 +63,7 @@ Before writing any files, present the **14-Point Blueprint Table** so the develo
 | **13** | **Observability & Alerts** | `/api/health` or job runner + JSON stdout logging + `alerts` |
 | **14** | **README & Runbook** | Local run (`make setup`, `make dev`, `make test`), deploy steps, and `unmet` notes |
 | **15** | **Local Development & `.env.example`** | `.env.example` with all secrets/config + `Makefile` + `backend/app/config.py` local `.env` loader |
+| **16** | **External Resource Prefixing (`<prefix>-<resource>`)** | `prefix` in `service.yaml` applied to all Cloud Run services/jobs, Scheduler entries, queues, secrets, and buckets |
 
 Ask the developer to confirm before running the phases.
 

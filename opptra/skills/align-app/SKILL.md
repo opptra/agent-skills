@@ -61,6 +61,7 @@ Always present **both** tables from `sdlc.py status --table`. Every row has a la
 | **13** | **Observability, Health & Alerts** | `/api/health`, logging format, job exit behavior on 429/5xx, alert policies | `/api/health` + JSON logs + non-zero exit on error + alerts | Yes / Partial / No | Add structured JSON logging rule/helper and `alerts: true` | |
 | **14** | **README, Runbook & Local Dev** | Existing `README.md` sections and dependency lockfiles | Purpose, local run, tests, deploy flow, and `unmet` notes | Yes / Incomplete | Update managed SDLC section in `README.md` while keeping existing architecture notes | |
 | **15** | **Local Development & `.env.example`** | Whether `.env.example` and `Makefile` (`make setup`, `make dev`, `make test`) exist | `.env.example` + `Makefile` + local `.env` secret fallback | Yes / Missing | Generate `.env.example` and `Makefile` so developers can run locally with `make setup && make dev` | |
+| **16** | **External Resource Prefixing (`<prefix>-<resource>`)** | Active `prefix` in `service.yaml` and whether all jobs, services, queues, secrets, and buckets carry `<prefix>-` | All external GCP resources prefixed with `<prefix>-` | Yes / Needs prefixing | Add `prefix` to `service.yaml`, prefix any unprefixed job/service/queue/secret ID, and run `sdlc.py sync-infra` | |
 
 ### Table B: Section 5 Breakdown
 
