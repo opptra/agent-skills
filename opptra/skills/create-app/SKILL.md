@@ -22,7 +22,10 @@ Script-Owned Paths: infra/, .github/workflows/, managed rule blocks in AGENTS.md
 ```
 
 1. **Resume check:** If `.sdlc/state.yaml` already exists in the target directory, read it and offer to resume from the next uncompleted phase instead of re-interviewing.
-2. **Linear check (#3):** Read the Linear issue when they named one. If Linear is not connected yet, continue the scaffold and connect it in Phase 2 before the run is finished. Do not invent a ticket id.
+2. **Linear & Planning check (#3):** Do not create a new Linear issue on every prompt while still brainstorming or refining the plan.
+   - First understand what needs to be built and agree on the overall plan (the 17-Point Blueprint Table below) with the developer.
+   - Check the current Git branch (`git branch --show-current`) and `.sdlc/state.yaml`. If a ticket ID is already active or provided by the user, read that Linear issue.
+   - If no Linear issue exists yet, once the user approves the blueprint, create **one** Linear issue containing the agreed plan, requirements, and acceptance criteria, and push the spec summary to that Linear issue. Do not invent a ticket id.
 3. **Local plan check:** Check the current directory for an existing migration or architecture plan (such as `MIGRATION_PLAN.md`). Treat every decision already stated in that plan—region, jobs, crons, Firestore vs Postgres vs BigQuery, buckets, queues, webhook receiver, secrets, domain edge cases—as answered. Do not re-ask what the plan already fixed.
 4. **Ask only what is missing:** Ask one question at a time in plain language using the structured question tool in Cursor.
 
@@ -64,6 +67,7 @@ Before writing any files, present the **14-Point Blueprint Table** so the develo
 | **14** | **README & Runbook** | Local run (`make setup`, `make dev`, `make test`), deploy steps, and `unmet` notes |
 | **15** | **Local Development & `.env.example`** | `.env.example` with all secrets/config + `Makefile` + `backend/app/config.py` local `.env` loader |
 | **16** | **External Resource Prefixing (`<prefix>-<resource>`)** | `prefix` in `service.yaml` applied to all Cloud Run services/jobs, Scheduler entries, queues, secrets, and buckets |
+| **17** | **Pre-Commit Hooks & Local CI Gate (`.githooks` + `make ci`)** | `.githooks/pre-commit`, `.githooks/pre-push`, and `make ci` verified and self-healed locally |
 
 Ask the developer to confirm before running the phases.
 
@@ -113,7 +117,7 @@ python3 "$tmpdir/sdlc/scripts/sdlc.py" check "$tmpdir/service.yaml"
 2. Write unit tests in `backend/tests/` for the entrypoints and platform invariants (disabled jobs exiting 0, lease contention exiting 0, failed upstream fetches exiting non-zero, webhook secret verification).
 3. Run `uv run ruff check . && uv run pytest` (and `npm run lint && npm run typecheck && npm test --if-present` for UI) and fix any failure before Phase 5.
 
-### Phase 5: Infra, Workflows, Rules & Final Scorecard (`sync-infra`)
+### Phase 5: Infra, Workflows, Rules, Hooks & Final Scorecard (`sync-infra`)
 1. If the user's plan has domain-specific edge cases (such as Section 6 of a migration plan), write them under `## Product contract` in `<target-dir>/AGENTS.md` and `<target-dir>/CLAUDE.md` so `sync-infra` preserves them below the managed SDLC rules block.
 2. Run:
    ```bash
@@ -122,7 +126,12 @@ python3 "$tmpdir/sdlc/scripts/sdlc.py" check "$tmpdir/service.yaml"
    python3 "$tmpdir/sdlc/scripts/sdlc.py" status "<target-dir>" --check
    rm -rf "$tmpdir"
    ```
-3. Never hand-edit `infra/` or `.github/workflows/`.
+3. **Run and verify the generated `.githooks/` and `make ci`:**
+   - Execute `.githooks/pre-commit` and `make ci` inside `<target-dir>`.
+   - If any lint, formatting, or test issue is auto-resolvable, fix it immediately and re-run until `.githooks/pre-commit` and `make ci` exit `0`.
+   - If a check fails due to something that cannot be resolved without user input, explain the exact failure and ask the developer whether to provide the input now or disable that specific check (`run_tests: false` or `run_lint: false`) in `service.yaml` (recording the reason under `unmet`).
+4. Push the agreed requirements and blueprint summary to the Linear issue.
+5. Never hand-edit `infra/` or `.github/workflows/`.
 
 ## 4. Summary scorecard, then next steps
 

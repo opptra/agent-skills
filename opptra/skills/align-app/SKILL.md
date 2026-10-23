@@ -62,6 +62,7 @@ Always present **both** tables from `sdlc.py status --table`. Every row has a la
 | **14** | **README, Runbook & Local Dev** | Existing `README.md` sections and dependency lockfiles | Purpose, local run, tests, deploy flow, and `unmet` notes | Yes / Incomplete | Update managed SDLC section in `README.md` while keeping existing architecture notes | |
 | **15** | **Local Development & `.env.example`** | Whether `.env.example` and `Makefile` (`make setup`, `make dev`, `make test`) exist | `.env.example` + `Makefile` + local `.env` secret fallback | Yes / Missing | Generate `.env.example` and `Makefile` so developers can run locally with `make setup && make dev` | |
 | **16** | **External Resource Prefixing (`<prefix>-<resource>`)** | Active `prefix` in `service.yaml` and whether all jobs, services, queues, secrets, and buckets carry `<prefix>-` | All external GCP resources prefixed with `<prefix>-` | Yes / Needs prefixing | Add `prefix` to `service.yaml`, prefix any unprefixed job/service/queue/secret ID, and run `sdlc.py sync-infra` | |
+| **17** | **Pre-Commit Hooks & Local CI Gate (`.githooks` + `make ci`)** | Whether `.githooks/pre-commit`, `.githooks/pre-push`, and `make ci` exist and pass | `.githooks/pre-commit` + `.githooks/pre-push` + `make ci` passing | Yes / Missing / Needs fix | Generate `.githooks/` and `make ci`, run them locally, auto-fix resolvable issues, or ask user whether to disable unresolvable checks | |
 
 ### Table B: Section 5 Breakdown
 
@@ -99,8 +100,12 @@ Ask the developer which rows to apply now (recommending all safe non-host-moving
    fi
    openspec init --tools cursor,claude
    ```
-6. If the Linear rule is missing from the scorecard, or the Linear connection cannot read an issue, connect Linear in Cursor or Claude in this turn and confirm one issue can be read. Linear is the IDE connection, not a dependency in `package.json`. Do not invent a ticket id. Do not call the alignment finished while Linear still cannot be read.
-7. Re-run `python3 "$tmpdir/sdlc/scripts/sdlc.py" status . --table` and `--check`, then delete `$tmpdir`.
+6. If the Linear rule is missing from the scorecard, or the Linear connection cannot read an issue, connect Linear in Cursor or Claude in this turn. Check the current branch (`git branch --show-current`) first to reuse any active ticket; if none exists, agree on the alignment plan with the user first and then read or create one Linear issue with the alignment plan and requirements. Do not create a new ticket on every prompt, and do not invent a ticket id.
+7. **Run and verify the generated `.githooks/` and `make ci`:**
+   - Run `.githooks/pre-commit` and `make ci`.
+   - Fix any auto-resolvable lint, formatting, or wiring issues automatically and re-run until green.
+   - If a check fails due to something that cannot be resolved without user input (such as legacy code errors, missing external credentials, or tests requiring external services), explain the exact failure to the developer and ask whether to **(a)** provide input / fix those files now or **(b)** disable that specific check (`run_tests: false` or `run_lint: false`) in `service.yaml` and record it under `unmet` so commits and PRs are not blocked.
+8. Re-run `python3 "$tmpdir/sdlc/scripts/sdlc.py" status . --table` and `--check`, then delete `$tmpdir`.
 
 ## 4. Summary and next steps
 
