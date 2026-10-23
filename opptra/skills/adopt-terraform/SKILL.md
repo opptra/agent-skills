@@ -41,7 +41,7 @@ Inspect the output of `discover-infra` alongside any Dockerfiles, `deploy/*.sh`,
 | Example: `noon-hourly` | Cloud Run Job (`asia-south1`, `2Gi`, `3000s`, cron) | `deploy/noon-pipeline/deploy.sh` | `modules/cloud-run-job` + `modules/schedule` | **Import** job, **Create/Sync** Scheduler | Cron schedules and job settings become PR-reviewed changes in `service.yaml` |
 | Example: `slack-bot-token` | Secret Manager secret ID | `--set-secrets` in `deploy.sh` | `modules/secrets` | **Import** secret shell (versions untouched) | Grants runtime service account `secretAccessor` without storing secret values in Git |
 
-Also highlight any custom flags in `deploy.sh` (such as per-component regions, `--memory`, `--timeout`, or `unmet` items like external BigQuery datasets) and explain how they map into `service.yaml`.
+Also highlight any custom flags in `deploy.sh` (such as per-component regions, `--memory`, `--timeout`, unprefixed legacy resource names vs `<prefix>-<resource>`, or `unmet` items like external BigQuery datasets) and explain how they map into `service.yaml`.
 
 Ask the developer to confirm which resources already exist in `prod_project` (to be imported) versus which are brand new.
 

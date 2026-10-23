@@ -34,6 +34,7 @@ Script-Owned Paths: infra/, .github/workflows/, managed rule blocks in AGENTS.md
 - **A real browser that must stay open, a long-lived process, or local disk state**: archetype `vm-worker`, auth `none`, parts `[worker]`.
 - **A page people open or an HTTP API**: archetype `cloud-run-service`, parts `[api]` (and `ui` when there is a page), auth `iap` (staff), `app-login`, `shared-secret` (webhook), or `public`.
 - **Per-component region**: Set `region` on a component when it runs in a different GCP region from the app default.
+- **Resource prefix (`prefix`)**: Every external resource created in GCP (Cloud Run services/jobs, Scheduler entries, Cloud Tasks queues, Secret Manager secrets, buckets, Cloud SQL instances, service accounts, and alert policies) is prefixed with `prefix` (defaults to `name` in `service.yaml`, e.g. `prefix: cx` → `cx-report-daily`, `cx-smtp`).
 - **Data, storage, queues, secrets, alerts**:
   - `database: postgres` (Cloud SQL), `firestore` (`(default)` DB), `bigquery` (analytical warehouse), or `none`
   - `bucket: private` for reports, manuals, exports, or uploads
