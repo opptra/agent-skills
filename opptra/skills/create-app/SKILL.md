@@ -7,7 +7,7 @@ description: Scaffolds a new Opptra app by reading the Linear issue and any loca
 
 You fill in facts, run the deterministic phase scripts in `opptra/sdlc-resources`, and customize the application entrypoints, data helpers, and unit tests in between. The generator decides `infra/`, `.github/workflows/`, and the managed rule blocks. Never hand-edit `.github/workflows/` or `infra/`.
 
-Do not create the GitHub repository. Do not run `bind-repo.sh` or `protect-branches.sh`. Do not leave a checkout of `opptra/sdlc-resources` on the machine.
+Do not create the empty GitHub repository. The developer creates that. When they give its URL, set the remote and push `main`, `staging`, and `production`. Do not run `scripts/bind-repo.sh` unless they say they have permission and ask you to run it. Do not run `protect-branches.sh`. Branch protection is an organization ruleset. Do not leave a checkout of `opptra/sdlc-resources` on the machine.
 
 Apps Script is not a choice. If the whole request is only Apps Script, say so and stop. When part of a request needs something the platform does not generate yet (such as project-level billing budgets), scaffold every part the platform does support and record the gap under `unmet` in `service.yaml` with a clear recommendation.
 
@@ -22,7 +22,7 @@ Script-Owned Paths: infra/, .github/workflows/, managed rule blocks in AGENTS.md
 ```
 
 1. **Resume check:** If `.sdlc/state.yaml` already exists in the target directory, read it and offer to resume from the next uncompleted phase instead of re-interviewing.
-2. **Linear check (#3):** Read the Linear issue they named. If Linear is not connected, or they did not give an issue, strongly recommend connecting Linear in Cursor or Claude and stop until the ticket can be read. Do not invent a ticket id.
+2. **Linear check (#3):** Read the Linear issue when they named one. If Linear is not connected yet, continue the scaffold and connect it in Phase 2 before the run is finished. Do not invent a ticket id.
 3. **Local plan check:** Check the current directory for an existing migration or architecture plan (such as `MIGRATION_PLAN.md`). Treat every decision already stated in that plan—region, jobs, crons, Firestore vs Postgres vs BigQuery, buckets, queues, webhook receiver, secrets, domain edge cases—as answered. Do not re-ask what the plan already fixed.
 4. **Ask only what is missing:** Ask one question at a time in plain language using the structured question tool in Cursor.
 
@@ -48,8 +48,8 @@ Before writing any files, present the **14-Point Blueprint Table** so the develo
 | # | Area | Planned Setup for This App |
 |---|---|---|
 | **1** | **Components & Architecture** | Component names, archetypes, regions, and parts |
-| **2** | **OpenSpec Setup** | Initialize `openspec/` in the repo (and strongly recommend installing `openspec` CLI if missing) |
-| **3** | **Linear Setup** | Linked Linear issue `<ticket-id>` |
+| **2** | **OpenSpec Setup** | Install `@fission-ai/openspec` if missing, then `openspec init --tools cursor,claude` in the app |
+| **3** | **Linear Setup** | Connect Linear in Cursor or Claude and read the issue before the scaffold is called done |
 | **4** | **`service.yaml` Manifest** | Root `service.yaml` + any `unmet` items and recommendations |
 | **5** | **Agentic Rules (5.1–5.10)** | All 10 rule pillars (`TDD`, `Commit/PR`, `Linear`, `OpenSpec`, `Infra/Terraform`, `Workflows`, `JSON Logging`, `Data Safety`, `Secrets/PII`, plus any domain edge cases under `## Product contract`) |
 | **6** | **GitHub Workflows** | `ci.yml`, `plan.yml`, `deploy-staging.yml`, `deploy-production.yml` |
@@ -84,8 +84,16 @@ python3 "$tmpdir/sdlc/scripts/sdlc.py" check "$tmpdir/service.yaml"
    ```bash
    python3 "$tmpdir/sdlc/scripts/sdlc.py" init-runtime "$tmpdir/service.yaml" "<target-dir>" --overwrite
    ```
-2. If `openspec` CLI is installed, run `openspec init --tools cursor,claude` inside `<target-dir>`.
-3. Customize the runtime files to match the domain (add required OS packages to `Dockerfile`, wire job entrypoints or initial API/UI routes, and scaffold any migration CLI under `tools/`).
+2. Install OpenSpec and initialize it in the app. An empty `openspec/` directory is not enough. From `<target-dir>`:
+   ```bash
+   if ! openspec --version; then
+     npm install -g @fission-ai/openspec@latest
+   fi
+   openspec init --tools cursor,claude
+   ```
+   If `npm install` or `openspec init` fails, fix that before Phase 3. Do not leave this as a later recommendation.
+3. Confirm Linear is connected in Cursor or Claude and that the named issue can be read. Linear is not an app package. It is the IDE connection the later skills use for the ticket id. If it is not connected, connect it in this phase and re-read the issue. Do not invent a ticket id, and do not finish the scaffold while the issue still cannot be read.
+4. Customize the runtime files to match the domain (add required OS packages to `Dockerfile`, wire job entrypoints or initial API/UI routes, and scaffold any migration CLI under `tools/`).
 
 ### Phase 3: Data, Storage & Secrets (`add-data`)
 1. Run:
@@ -113,23 +121,42 @@ python3 "$tmpdir/sdlc/scripts/sdlc.py" check "$tmpdir/service.yaml"
    ```
 3. Never hand-edit `infra/` or `.github/workflows/`.
 
-## 4. Hand-off & Walking-Skeleton Choice
+## 4. Summary scorecard, then next steps
 
-Show the final 14-point scorecard table and the commands to push `main`, `staging`, and `production`:
+Do not stop after `status --table` alone. Add a second table, **Built and still to build**, before the summary. One row per thing the plan or the request asked for.
 
-```bash
-git init
-git add .
-git commit -m "feat: <ticket-id> scaffold"
-git branch -M main
-git remote add origin git@github.com:opptra/<name>.git
-git push -u origin main
-git branch staging
-git branch production
-git push -u origin staging
-git push -u origin production
-```
+| Item | In the scaffold? | Why | What you do next |
+|---|---|---|---|
+| Example: eight Cloud Run jobs | Yes | The plan listed them, so the scaffold created the jobs, commands, and crons | Try them with a direct push to staging after bind-repo.sh |
+| Example: laptop handler code | No | The scaffold is the platform shell. Porting behaviour is a feature | One `/feature` pull request per cutover slice |
 
-Remind them to ask a platform owner to run `scripts/protect-branches.sh` and `scripts/bind-repo.sh`.
+Mark each row Yes or No. A Yes row says why it was included. A No row says it was left out on purpose and what the next pull request is. Include `unmet` items as No.
 
-If there are follow-up feature/migration slices to port next, ask **once**: whether to pause for review after each slice or run through each check automatically.
+### Summary
+
+Say what was created: app name, directory, workloads, data store, bucket, queue, auth, and that `openspec/` was initialized. Name the Linear issue id that was read. Name anything still under `unmet`.
+
+### Next steps, in this order
+
+1. Ask whether the empty GitHub repository already exists. If they paste a URL now or in a later message, store it and push the three branches. Accept `https://github.com/org/repo`, `git@github.com:org/repo.git`, or `org/repo`.
+   ```bash
+   python3 scripts/sdlc.py set-github-repo "<url>" .
+   git init
+   git add .
+   git commit -m "feat: <ticket-id> scaffold"
+   git branch -M main
+   git remote add origin "<url>"
+   git push -u origin main
+   git branch staging
+   git branch production
+   git push -u origin staging
+   git push -u origin production
+   ```
+   If `origin` already exists, use `git remote set-url origin "<url>"`. If a branch already exists on the remote, do not force-push. If they do not have a repository yet, stop this step and continue when they send the URL. Read `.sdlc/state.yaml` on a later turn so you do not re-ask the scaffold facts.
+2. Explain `scripts/bind-repo.sh` before anyone runs it. It lets GitHub Actions for this repository impersonate a deployer service account in the production project and in `opptra-staging`. That account can push the image and apply Terraform. The script does not deploy. A direct push to `staging` deploys staging. A pull request from `main` into `production` is the only deploy that comes from `main`. Do not merge `main` into `staging`. Branch protection is already an organization ruleset, so this script does not protect branches. The developer runs `scripts/bind-repo.sh` if they can change IAM in those projects. Otherwise they give that file to someone who can. Do not run it yourself unless they say they have permission and ask you to.
+3. After the bind script has succeeded, a developer pushes the branch they want to try directly to `staging` and reads the Terraform plan. Confirm the jobs, schedules, and webhook match `service.yaml`. A disabled job must have no Scheduler entry. Merging to `main` does not update staging.
+4. Put secret values into Secret Manager. The scaffold only created secret ids.
+5. Close each `unmet` item in its own pull request, highest risk first. A data import or a budget alert is this step, not a reason to re-run the scaffold.
+6. Port behaviour in `/feature` pull requests. One slice at a time. The scaffold does not include the product handlers.
+
+If those feature slices are already known, ask **once**: pause for review after each slice, or run each slice through its checks without stopping.

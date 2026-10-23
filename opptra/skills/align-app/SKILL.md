@@ -40,31 +40,33 @@ Inspect the repository layout (`Dockerfile`, `deploy/`, `pyproject.toml`, `requi
 - Use per-component `path` and `frontend_path` when code lives in existing folders (such as `path: .` and `frontend_path: apps/web`) instead of `components/<name>`, so `.github/workflows/ci.yml` runs against directories that actually exist.
 - Use `database: postgres | firestore | bigquery | none`, `bucket: private | none`, `queue`, `secrets`, `alerts`, and `unmet` for any platform gap.
 
-Always present **both** tables in full so every team member sees the same 14 areas and 10 rule pillars:
+Always present **both** tables from `sdlc.py status --table`. Every row has a last column, **What this means for you**. Keep that column. If the default sentence does not match this repo, rewrite it in plain language: what the row is checking, and what the developer will do differently once that row is in place.
 
 ### Table A: 14-Point Repository Scorecard
 
-| # | Area | Current Setup in Repo | Target Standard | Up to the Mark? | Action / Changes to be Done |
-|---|---|---|---|---|---|
+| # | Area | Current Setup in Repo | Target Standard | Up to the Mark? | Action / Changes to be Done | What this means for you |
+|---|---|---|---|---|---|---|
 | **1** | **Components & Architecture** | Services, UIs, scheduled jobs, regions, and actual repo paths found | All components, regions, and paths mapped | Yes / Partial / No | Map components, regions, and `path` / `frontend_path` in `service.yaml` |
-| **2** | **OpenSpec Setup** | Whether `openspec` CLI is installed and `openspec/` directory exists | `openspec` CLI + `openspec/` initialized | Yes / Partial / No | **Strongly Recommended:** Run `openspec init --tools cursor,claude` now so `/feature` never blocks |
-| **3** | **Linear Setup** | Whether Linear MCP is connected and ticket workflow is configured | Linear MCP connected + mandatory ticket rule | Yes / Partial / No | **Strongly Recommended:** Connect Linear MCP and add rule 5.3 |
+| **2** | **OpenSpec Setup** | Whether `openspec` CLI is installed and `openspec/` is initialized | CLI installed and `openspec init` already run | Yes / Partial / No | Install `@fission-ai/openspec` if needed and run `openspec init --tools cursor,claude` in this repo |
+| **3** | **Linear Setup** | Whether Linear can read an issue | Linear connected and one issue readable | Yes / Partial / No | Connect Linear in Cursor or Claude in this turn and confirm an issue can be read |
 | **4** | **`service.yaml` Manifest** | Missing or present (and whether all components/secrets/regions are valid) | Valid root `service.yaml` | Yes / No | Write or update `service.yaml` and validate with `sdlc.py check` |
 | **5** | **Agentic Rules (`AGENTS.md`, `CLAUDE.md`, `.cursor/rules`)** | Summary score (`X/10 pillars`) + whether `.cursor/rules/*.mdc` exist | 10/10 pillars + preserved `## Product contract` | Yes / Partial (`X/10`) | Sync managed `<!-- sdlc-rules-start -->` block while keeping Product Contract intact (see Table B) |
 | **6** | **GitHub Workflows (`.github/workflows`)** | Existing workflows and whether their `working_directory` paths exist | PR-only `ci.yml` matching actual repo paths + `plan.yml` / `deploy-*.yml` when Terraform is active | Yes / Needs fix / Missing | Generate `ci.yml` (`--ci-only` when still on legacy deploy scripts, or full workflows when Terraform is active) |
 | **7** | **Testing Setup & Coverage** | Existing Python/UI test files, `pyproject.toml` / `pytest.ini`, UI `lint`/`typecheck`/`test` scripts | Ruff + pytest for Python; lint + typecheck + test for UI | Yes / Partial / No | Add missing test runner config or run `sdlc.py add-tests` |
 | **8** | **Deployment & Infrastructure** | How deployment happens today (`deploy/*.sh`, `vercel.json`, `fly.toml`, Task Scheduler) | Terraform `infra/` + GitHub Actions WIF on `staging` & `production` | Yes / Transitional / Missing | Keep current deploy during initial alignment; schedule `change-app` PR to generate & import Terraform before retiring scripts |
-| **9** | **Git Branches & Governance** | Default branch on GitHub, `main` / `staging` / `production`, `CODEOWNERS`, PR template | `main` default, `staging` & `production` branches, `CODEOWNERS`, PR template | Yes / Partial / No | Create missing branches, write `.github/CODEOWNERS` & PR template, remind platform owner to run `protect-branches.sh` |
+| **9** | **Git Branches & Governance** | Default branch on GitHub, `main` / `staging` / `production`, `CODEOWNERS`, PR template | `main` default, `staging` & `production` branches, `CODEOWNERS`, PR template | Yes / Partial / No | Create missing branches and write `.github/CODEOWNERS` and the PR template. Organization rules protect `main` and `production`. |
 | **10** | **Secrets, Credentials & Security** | `.gitignore` coverage, local `secrets/` or `.env` files, GCP Secret Manager usage | Secret IDs in `service.yaml`; no keys in Git | Yes / Review needed | Ensure `.env*` and `secrets/` are in `.gitignore`; list Secret Manager IDs in `service.yaml` |
 | **11** | **Database, Warehouse & State** | Cloud SQL Postgres, Firestore, BigQuery DDL, GCS buckets, or local caches | Declared in `service.yaml` with matching safety rules | Yes / Partial / No | Set `database: postgres \| firestore \| bigquery \| none` and sync data rules |
 | **12** | **Authentication & Access Control** | Auth on each service/UI/webhook (`iap`, `app-login`, `shared-secret`, `public`) | Explicit `auth` per component (`iap` for staff UIs) | Yes / Needs mapping | Record `auth` on each component in `service.yaml` |
 | **13** | **Observability, Health & Alerts** | `/api/health`, logging format, job exit behavior on 429/5xx, alert policies | `/api/health` + JSON logs + non-zero exit on error + alerts | Yes / Partial / No | Add structured JSON logging rule/helper and `alerts: true` |
 | **14** | **README, Runbook & Local Dev** | Existing `README.md` sections and dependency lockfiles | Purpose, local run, tests, deploy flow, and `unmet` notes | Yes / Incomplete | Update managed SDLC section in `README.md` while keeping existing architecture notes |
 
-### Table B: Section 5 Breakdown — Agentic Rules (`5.1 – 5.10`)
+### Table B: Section 5 Breakdown
 
-| Sub-step | Rule Pillar | Current State in Repo | Up to the Mark? | Changes to be Done |
-|---|---|---|---|---|
+Fill **What this means for you** on every row from `sdlc.py status --table`, rewritten in plain language for this repo. — Agentic Rules (`5.1 – 5.10`)
+
+| Sub-step | Rule Pillar | Current State in Repo | Up to the Mark? | Changes to be Done | What this means for you |
+|---|---|---|---|---|---|
 | **5.1** | **Test-Driven Development (TDD)** | Whether test-first and component test commands are documented | Yes / No | Keep existing TDD rules and include exact repo test commands |
 | **5.2** | **Commit, PR & GitHub Flow** | `feat/<ticket>-<slug>`, `feat: <ticket> ...`, `main` / `staging` / `production` flow, infra PR split | Yes / Partial / No | Sync branch, commit, staging push, and infra PR separation rules |
 | **5.3** | **Linear Rules** | Mandatory Linear issue check before code, stop if disconnected, no invented IDs | Yes / No | Add mandatory Linear ticket rule |
@@ -88,4 +90,30 @@ Ask the developer which rows to apply now (recommending all safe non-host-moving
    Otherwise, run the selected phases (`add-data`, `add-tests`, `sync-infra`).
 3. If the developer accepted OpenSpec setup and `openspec` CLI is installed, run `openspec init --tools cursor,claude` (or create `openspec/`).
 4. Create `staging` and `production` branches from `main` when missing.
-5. Re-run `python3 "$tmpdir/sdlc/scripts/sdlc.py" status . --table` and `--check` to show the updated scorecard, then delete `$tmpdir`.
+5. If the developer accepted the OpenSpec row, or `openspec/` is missing or only contains `.gitkeep`, install and initialize it in this repository. Do not leave it as a recommendation.
+   ```bash
+   if ! openspec --version; then
+     npm install -g @fission-ai/openspec@latest
+   fi
+   openspec init --tools cursor,claude
+   ```
+6. If the Linear rule is missing from the scorecard, or the Linear connection cannot read an issue, connect Linear in Cursor or Claude in this turn and confirm one issue can be read. Linear is the IDE connection, not a dependency in `package.json`. Do not invent a ticket id. Do not call the alignment finished while Linear still cannot be read.
+7. Re-run `python3 "$tmpdir/sdlc/scripts/sdlc.py" status . --table` and `--check`, then delete `$tmpdir`.
+
+## 4. Summary and next steps
+
+End with both of these. The scorecard is not the last thing the developer sees.
+
+### Summary
+
+Say which scorecard rows changed, whether OpenSpec is initialized, and whether Linear can read an issue. Name files written. Name what was left on the old deploy path on purpose.
+
+### Next steps, in this order
+
+1. Commit the accepted alignment on a branch and open one pull request into `main`.
+2. Connect anything still red on OpenSpec or Linear before the next `/feature` or `/bug`.
+3. When this alignment added a deploy workflow, `scripts/bind-repo.sh` is in the repo with the production project filled in. Explain it: the script lets GitHub Actions impersonate a deployer account and apply Terraform. It does not deploy, and it does not protect branches. Organization rules cover `main` and `production`. The developer runs the script if they can change IAM. Otherwise they give the file to someone who can. Do not run `protect-branches.sh`.
+4. If `origin` is missing and the developer gives a repository URL now or later, set the remote and push `main`, `staging`, and `production` from the current commit. Record the URL with `python3 scripts/sdlc.py set-github-repo "<url>" .`. Do not force-push. Do not create the empty GitHub repository.
+5. After `scripts/bind-repo.sh` has succeeded, try staging by pushing a branch directly to `staging`. Do not merge `main` into `staging`. Production is a pull request from `main` into `production`.
+6. Move laptop or other legacy deploy scripts to Terraform with `/change-app` before deleting them.
+7. Port or fix product behaviour with `/feature` and `/bug`. Those skills expect OpenSpec and a real Linear issue.

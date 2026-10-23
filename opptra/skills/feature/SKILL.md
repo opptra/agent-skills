@@ -5,7 +5,7 @@ description: Implements a Linear feature on a branch off main, verifying repo al
 
 # Feature
 
-`main` is the default branch and does not deploy. You do not merge. You do not push `staging` or open the production pull request unless the developer asks.
+`main` is the default branch and does not deploy. You do not merge. You do not push `staging` or open the production pull request unless the developer asks. A staging try is a direct push of the feature branch to `staging`. Do not merge `main` into `staging`. Production is only a pull request from `main` into `production`.
 
 Before you edit files, print the Route Banner, tell the developer what you will change, and wait for a yes. Before a commit, show the message and the file list and wait. Before a push or a pull request, show the branch, title, and body and wait. Do not commit or push in the same turn as the code unless they already agreed.
 
