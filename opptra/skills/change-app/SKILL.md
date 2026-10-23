@@ -29,7 +29,7 @@ Script-Owned Paths: infra/, .github/workflows/, managed rule blocks in AGENTS.md
 ## 2. Apply in Phases
 
 1. Branch from `main` as `infra/<ticket-id>-<short-slug>`.
-2. Update `service.yaml` (and `config/jobs.yaml` if changing job schedules or `enabled` flags). Record any unsupported platform need under `unmet` with a recommendation.
+2. Update `service.yaml` (and `config/jobs.yaml` if changing job schedules or `enabled` flags). Ensure any new external GCP resource (job, service, queue, secret ID) follows the `<prefix>-<resource>` naming standard. Record any unsupported platform need under `unmet` with a recommendation.
 3. Validate and run the phases:
    ```bash
    python3 "$tmpdir/sdlc/scripts/sdlc.py" check service.yaml
