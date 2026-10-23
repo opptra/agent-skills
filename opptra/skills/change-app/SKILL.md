@@ -18,7 +18,9 @@ Human Gates: Before editing service.yaml, before commit, and before push/PR
 Script-Owned Paths: infra/, .github/workflows/, managed rule blocks in AGENTS.md & CLAUDE.md
 ```
 
-1. Read the Linear issue. If Linear is not connected, stop and ask the developer to connect it. Do not invent a ticket id.
+1. **Plan first and resolve the Linear ticket:**
+   - Agree on the capability or schedule change with the developer before creating a ticket.
+   - Check `git branch --show-current`: if an `infra/<ticket-id>-...` branch is already checked out and this change belongs to that same ticket, reuse `<ticket-id>` and update that Linear issue; if unclear, ask the developer. Otherwise read the named Linear issue or create one after the plan is agreed, and sync the planned `service.yaml` changes to the Linear issue. Do not invent a ticket id.
 2. Read `service.yaml`. If `service.yaml` is missing, stop and run `align-app` first.
 3. Clone `main` of `opptra/sdlc-resources` into a temporary directory:
    ```bash
@@ -41,5 +43,5 @@ Script-Owned Paths: infra/, .github/workflows/, managed rule blocks in AGENTS.md
    rm -rf "$tmpdir"
    ```
 4. Do not hand-edit `infra/` or `.github/workflows/`.
-5. Run the lint and test checks for any component touched (`uv run ruff check . && uv run pytest`).
+5. Run `.githooks/pre-commit` and `make ci` (plus `uv run ruff check . && uv run pytest` for any component touched). Never pass `--no-verify` to `git commit` or `git push`.
 6. Push the branch and open one pull request into `main`. Read the `terraform plan` comment on the pull request and stop if any unexpected resource destroy appears.
