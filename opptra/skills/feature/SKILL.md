@@ -19,15 +19,7 @@ Forbidden in this Route: Editing service.yaml, infra/, .github/workflows/, or cr
 
 ## Steps
 
-1. **Understand, plan first, and resolve the Linear ticket (do not create a new ticket on every prompt):**
-   - Discuss and clarify what needs to be implemented and agree on the plan with the developer before creating a Linear ticket.
-   - Check the current Git branch (`git branch --show-current`) and `.sdlc/state.yaml` first:
-     - **If a ticket branch (`feat/<ticket-id>-...`, `fix/<ticket-id>-...`, `infra/<ticket-id>-...`) is already checked out:**
-       - If the new ask is clearly part of that same ticket/feature, reuse that `<ticket-id>`, update the existing Linear issue with the added requirements and spec updates, and stay on the current branch.
-       - If it is not clear whether the new ask belongs to the current ticket or is a separate task, ask the developer whether to **(a)** add it to the existing Linear issue `<ticket-id>` on this branch or **(b)** switch to `main` and use/create a new Linear issue.
-     - **If on `main` (or no ticket branch is active):**
-       - If the developer gave a ticket ID, read that issue from Linear.
-       - If they did not give a ticket ID, once the developer approves your implementation plan, create **one** Linear issue containing the agreed title, requirements, and acceptance criteria. Do not invent a ticket id.
+1. **Understand, plan first, and resolve the Linear ticket.** Read and follow `../linear-continuity/SKILL.md`. When you create or update the issue, include the agreed title, requirements, and acceptance criteria. Sync the OpenSpec summary in the OpenSpec step. Do not invent a ticket id.
 2. **Verify alignment and capabilities:**
    - Read `service.yaml`, `AGENTS.md` (including `## Product contract`), and `.cursor/rules/*.mdc` (and run `python3 scripts/sdlc.py status --check` if `scripts/sdlc.py` is present).
    - If the feature requires a new cloud resource, database, bucket, queue, secret ID, job entrypoint, or cron schedule change in `service.yaml`, stop and route that part to `change-app` in a separate pull request first.

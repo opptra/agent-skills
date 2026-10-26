@@ -13,14 +13,12 @@ Before you edit files, print the Route Banner, tell the developer what you will 
 
 ```text
 Route: change-app | Branch: infra/<ticket-id>-<slug>
-Phases: 1. Update service.yaml  2. add-data  3. add-tests  4. sync-infra  5. Verify 14-Point Scorecard
+Phases: 1. Update service.yaml  2. add-data  3. add-tests  4. sync-infra  5. Verify 17-Point Scorecard
 Human Gates: Before editing service.yaml, before commit, and before push/PR
 Script-Owned Paths: infra/, .github/workflows/, managed rule blocks in AGENTS.md & CLAUDE.md
 ```
 
-1. **Plan first and resolve the Linear ticket:**
-   - Agree on the capability or schedule change with the developer before creating a ticket.
-   - Check `git branch --show-current`: if an `infra/<ticket-id>-...` branch is already checked out and this change belongs to that same ticket, reuse `<ticket-id>` and update that Linear issue; if unclear, ask the developer. Otherwise read the named Linear issue or create one after the plan is agreed, and sync the planned `service.yaml` changes to the Linear issue. Do not invent a ticket id.
+1. **Plan first and resolve the Linear ticket.** Agree the capability or schedule change with the developer, then read and follow `../linear-continuity/SKILL.md`. When you create or update the issue, include the planned `service.yaml` changes. Do not invent a ticket id.
 2. Read `service.yaml`. If `service.yaml` is missing, stop and run `align-app` first.
 3. Clone `main` of `opptra/sdlc-resources` into a temporary directory:
    ```bash

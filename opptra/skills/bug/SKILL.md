@@ -17,13 +17,7 @@ Forbidden in this Route: Editing service.yaml, infra/, .github/workflows/, or cr
 
 ## Steps
 
-1. **Understand the bug and resolve the Linear ticket (do not create a new ticket on every prompt):**
-   - Confirm the root cause and fix plan with the developer first.
-   - Check the current Git branch (`git branch --show-current`) and `.sdlc/state.yaml`:
-     - **If a ticket branch (`feat/<ticket-id>-...`, `fix/<ticket-id>-...`) is already checked out:**
-       - If this bug fix is part of the work on that same ticket, reuse `<ticket-id>`, update the Linear issue with the bug note if not already present, and stay on the current branch.
-       - If it is unclear whether the bug belongs to the current branch's ticket or is a separate issue, ask the developer whether to **(a)** keep it on the current ticket `<ticket-id>` or **(b)** switch to `main` and use/create a separate Linear bug ticket.
-     - **If on `main`:** Read the Linear issue they named, or once the fix plan is agreed, create **one** Linear bug issue with the reproduction steps, expected result, and actual result. Do not invent a ticket id.
+1. **Understand the bug and resolve the Linear ticket.** Confirm the root cause and fix plan with the developer, then read and follow `../linear-continuity/SKILL.md`. When you create or update the issue, include the reproduction steps, expected result, and actual result. Add a bug note only when that note is not already on the issue. Do not invent a ticket id.
 2. **Read `service.yaml`, `AGENTS.md` (including `## Product contract`), and `.cursor/rules/*.mdc`:**
    - If the fix needs a product or design choice, stop and follow the `feature` skill, including an OpenSpec.
    - If the fix requires changing `service.yaml`, `config/jobs.yaml` schedules, `infra/`, or `.github/workflows/`, stop and follow the `change-app` skill.

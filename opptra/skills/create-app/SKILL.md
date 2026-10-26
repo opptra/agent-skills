@@ -1,6 +1,6 @@
 ---
 name: create-app
-description: Scaffolds a new Opptra app by reading the Linear issue and any local plan, showing a 14-point blueprint table, writing service.yaml, and running the 5-phase generator from opptra/sdlc-resources. Use when a developer asks to create, scaffold, or set up a new app or repository.
+description: Scaffolds a new Opptra app by reading the Linear issue and any local plan, showing a 17-point blueprint table, writing service.yaml, and running the 5-phase generator from opptra/sdlc-resources. Use when a developer asks to create, scaffold, or set up a new app or repository.
 ---
 
 # Create an app
@@ -17,15 +17,12 @@ Print the route banner first so the developer knows the phases and gates:
 
 ```text
 Route: create-app | Phases: 1. Manifest  2. Runtime & OpenSpec  3. Data/Cloud  4. Tests  5. Infra/CI/Rules
-Human Gates: After the 14-Point Blueprint Table, and after Phase 5 (Walking Skeleton)
+Human Gates: After the 17-Point Blueprint Table, and after Phase 5 (Walking Skeleton)
 Script-Owned Paths: infra/, .github/workflows/, managed rule blocks in AGENTS.md & CLAUDE.md
 ```
 
 1. **Resume check:** If `.sdlc/state.yaml` already exists in the target directory, read it and offer to resume from the next uncompleted phase instead of re-interviewing.
-2. **Linear & Planning check (#3):** Do not create a new Linear issue on every prompt while still brainstorming or refining the plan.
-   - First understand what needs to be built and agree on the overall plan (the 17-Point Blueprint Table below) with the developer.
-   - Check the current Git branch (`git branch --show-current`) and `.sdlc/state.yaml`. If a ticket ID is already active or provided by the user, read that Linear issue.
-   - If no Linear issue exists yet, once the user approves the blueprint, create **one** Linear issue containing the agreed plan, requirements, and acceptance criteria, and push the spec summary to that Linear issue. Do not invent a ticket id.
+2. **Linear:** Read and follow `../linear-continuity/SKILL.md` before creating or updating a Linear issue. Agree the 17-point blueprint in `reference.md` first. When you create or update the issue, include that blueprint, the requirements, and the acceptance criteria. Do not invent a ticket id. `.sdlc/state.yaml` is only for resuming a phase, not for a ticket id.
 3. **Local plan check:** Check the current directory for an existing migration or architecture plan (such as `MIGRATION_PLAN.md`). Treat every decision already stated in that plan—region, jobs, crons, Firestore vs Postgres vs BigQuery, buckets, queues, webhook receiver, secrets, domain edge cases—as answered. Do not re-ask what the plan already fixed.
 4. **Ask only what is missing:** Ask one question at a time in plain language using the structured question tool in Cursor.
 
@@ -45,31 +42,9 @@ Script-Owned Paths: infra/, .github/workflows/, managed rule blocks in AGENTS.md
   - `secrets: [<id>, ...]` for Secret Manager shells (IDs only, never values)
   - `alerts: true` for failed job / error log alert policies
 
-## 2. Show the 14-Point Blueprint Table & Wait for Confirmation
+## 2. Show the 17-Point Blueprint Table & Wait for Confirmation
 
-Before writing any files, present the **14-Point Blueprint Table** so the developer sees the complete setup:
-
-| # | Area | Planned Setup for This App |
-|---|---|---|
-| **1** | **Components & Architecture** | Component names, archetypes, regions, and parts |
-| **2** | **OpenSpec Setup** | Install `@fission-ai/openspec` if missing, then `openspec init --tools cursor,claude` in the app |
-| **3** | **Linear Setup** | Connect Linear in Cursor or Claude and read the issue before the scaffold is called done |
-| **4** | **`service.yaml` Manifest** | Root `service.yaml` + any `unmet` items and recommendations |
-| **5** | **Agentic Rules (5.1–5.10)** | All 10 rule pillars (`TDD`, `Commit/PR`, `Linear`, `OpenSpec`, `Infra/Terraform`, `Workflows`, `JSON Logging`, `Data Safety`, `Secrets/PII`, plus any domain edge cases under `## Product contract`) |
-| **6** | **GitHub Workflows** | `ci.yml`, `plan.yml`, `deploy-staging.yml`, `deploy-production.yml` |
-| **7** | **Testing Setup** | `pytest` + `ruff` (and `npm run lint` / `typecheck` / `test` when `ui` is present) |
-| **8** | **Deployment & Infrastructure** | Terraform `infra/` + WIF deploy on `staging` push and `production` PR merge |
-| **9** | **Git Branches & Governance** | `main`, `staging`, `production`, `.github/CODEOWNERS`, PR template |
-| **10** | **Secrets & Security** | Secret Manager shells in `service.yaml` + `.gitignore` |
-| **11** | **Database, Warehouse & State** | `postgres`, `firestore`, `bigquery`, or `none` + `bucket` / `queue` |
-| **12** | **Authentication** | `iap`, `app-login`, `shared-secret`, `public`, or `none` |
-| **13** | **Observability & Alerts** | `/api/health` or job runner + JSON stdout logging + `alerts` |
-| **14** | **README & Runbook** | Local run (`make setup`, `make dev`, `make test`), deploy steps, and `unmet` notes |
-| **15** | **Local Development & `.env.example`** | `.env.example` with all secrets/config + `Makefile` + `backend/app/config.py` local `.env` loader |
-| **16** | **External Resource Prefixing (`<prefix>-<resource>`)** | `prefix` in `service.yaml` applied to all Cloud Run services/jobs, Scheduler entries, queues, secrets, and buckets |
-| **17** | **Pre-Commit Hooks & Local CI Gate (`.githooks` + `make ci`)** | `.githooks/pre-commit`, `.githooks/pre-push`, and `make ci` verified and self-healed locally |
-
-Ask the developer to confirm before running the phases.
+Before writing any files, present the 17-point blueprint table in `reference.md` and wait for the developer to confirm.
 
 ## 3. Execute the 5 Phases (`script → skill → check`)
 
@@ -83,7 +58,7 @@ git clone --depth 1 --branch main https://github.com/opptra/sdlc-resources.git "
 ### Phase 1: Manifest (`check`)
 Write `service.yaml` and validate it:
 ```bash
-python3 "$tmpdir/sdlc/scripts/sdlc.py" check "$tmpdir/service.yaml"
+python3 "$tmpdir/sdlc/scripts/sdlc.py" check "<target-dir>/service.yaml"
 ```
 
 ### Phase 2: Runtime, OpenSpec & Entrypoints (`init-runtime`)

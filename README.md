@@ -12,6 +12,7 @@ The skills every Opptra developer uses to create an app, change an app's capabil
 | `bug` | A Linear bug. Verifies repo alignment and capability rules, writes a failing test first, makes the fix, and opens one pull request into `main`. |
 | `add-skill` | A new team skill. Writes `opptra/skills/<name>/SKILL.md` and opens a pull request into `main`. |
 | `modify-skill` | A change to an existing team skill. Edits that skill from the developer's instructions and opens a pull request into `main`. |
+| `linear-continuity` | Shared reference read by the skills above before they create or update a Linear issue. Do not run it on its own. |
 | `fetch-skill` | Fetches `main` of this repository and links every skill into Cursor, Claude Code, and Codex. |
 
 `opptra/sdlc-resources` stays the library: the mapping, the skeletons, the phase CLI (`scripts/sdlc.py`), the Terraform modules, and the workflows. People do not keep that repo checked out.

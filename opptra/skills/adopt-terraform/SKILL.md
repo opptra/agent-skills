@@ -22,7 +22,7 @@ Human Gates: Before writing files, before commit/push, and on the PR Terraform p
 Script-Owned Paths: infra/main.tf, infra/variables.tf, infra/outputs.tf, .github/workflows/
 ```
 
-1. **Plan first and resolve the Linear ticket:** Check `git branch --show-current` first to reuse any active ticket branch if related; otherwise agree on the Terraform adoption plan with the developer first, then read or create one Linear issue and push the adoption scorecard summary to that Linear issue. Do not invent a ticket id.
+1. **Plan first and resolve the Linear ticket.** Agree the Terraform adoption plan with the developer, then read and follow `../linear-continuity/SKILL.md`. When you create or update the issue, include the adoption scorecard summary. Do not invent a ticket id.
 2. Clone `main` of `opptra/sdlc-resources` into a temporary directory and run `discover-infra`:
    ```bash
    tmpdir=$(mktemp -d)
