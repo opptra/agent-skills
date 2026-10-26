@@ -7,7 +7,7 @@ description: Adds or updates workloads, scheduled jobs, cron schedules, regions,
 
 Product code and changes to `service.yaml`, `config/jobs.yaml` schedules, `infra/`, or `.github/workflows/` belong in separate pull requests. Use this skill when an existing app needs a new workload, a new capability (`postgres`, `firestore`, `bigquery`, `bucket`, `queue`, `secrets`, `alerts`), a per-component `region`, a new scheduled job, or a cron/enable flag change.
 
-Before you edit files, print the Route Banner, tell the developer what you will change in `service.yaml` and which files the phase scripts will regenerate, and wait for a yes. Before a commit, show the message and file list and wait. Before a push or pull request, show the branch, title, and body and wait.
+Before you edit files, read Pins in `../session/SKILL.md`, print the Route Banner with those two lines, tell the developer what you will change in `service.yaml` and which files the phase scripts will regenerate, and wait for a yes. Before a commit, show the message and file list and wait. Before a push or pull request, show the branch, title, and body and wait.
 
 ## 1. Route Banner & Understand
 

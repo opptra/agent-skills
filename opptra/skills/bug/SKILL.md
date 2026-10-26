@@ -5,7 +5,7 @@ description: Fixes a Linear bug with a failing test first on a branch off main, 
 
 # Bug
 
-Before you edit files, print the Route Banner, tell the developer what you will change, and wait for a yes. Before a commit, run `.githooks/pre-commit` and `make ci`, show the message and the file list, and wait. Before a push or a pull request, show the branch, title, and body and wait. Never pass `--no-verify` to `git commit` or `git push`.
+Before you edit files, read `../session/SKILL.md` and print the Route Banner with its Pins lines. Tell the developer what you will change, and wait for a yes. Before a commit, run `.githooks/pre-commit` and `make ci`, show the message and the file list, and wait. Before a push or a pull request, show the branch, title, and body and wait. Never pass `--no-verify` to `git commit` or `git push`.
 
 ## Route Banner
 
@@ -17,7 +17,7 @@ Forbidden in this Route: Editing service.yaml, infra/, .github/workflows/, or cr
 
 ## Steps
 
-1. **Understand the bug and resolve the Linear ticket.** Confirm the root cause and fix plan with the developer, then read and follow `../linear-continuity/SKILL.md`. When you create or update the issue, include the reproduction steps, expected result, and actual result. Add a bug note only when that note is not already on the issue. Do not invent a ticket id.
+1. **Understand the bug and resolve the Linear ticket.** Follow Resume in `../session/SKILL.md`. Confirm the root cause and fix plan with the developer, then read and follow `../linear-continuity/SKILL.md`. When you create or update the issue, include the reproduction steps, expected result, and actual result. Add a bug note only when that note is not already on the issue. When the developer approves the plan, write `.sdlc/intent.yaml` with `route: bug` and no `depth`, before the test. Do not invent a ticket id.
 2. **Read `service.yaml`, `AGENTS.md` (including `## Product contract`), and `.cursor/rules/*.mdc`:**
    - If the fix needs a product or design choice, stop and follow the `feature` skill, including an OpenSpec.
    - If the fix requires changing `service.yaml`, `config/jobs.yaml` schedules, `infra/`, or `.github/workflows/`, stop and follow the `change-app` skill.

@@ -13,7 +13,7 @@ Apps Script is not a choice. If the whole request is only Apps Script, say so an
 
 ## 1. Route Banner, Resume Check & Understand
 
-Print the route banner first so the developer knows the phases and gates:
+Read Pins in `../session/SKILL.md`. Print the route banner first, including those two lines, so the developer knows the phases and gates:
 
 ```text
 Route: create-app | Phases: 1. Manifest  2. Runtime & OpenSpec  3. Data/Cloud  4. Tests  5. Infra/CI/Rules

@@ -1,6 +1,7 @@
 ---
 name: modify-skill
 description: Changes an existing Opptra skill in the opptra/agent-skills repository from the developer's instructions and opens a pull request. Use when a developer asks to modify, edit, change, or update an existing skill.
+disable-model-invocation: true
 ---
 
 # Modify a skill

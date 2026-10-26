@@ -1,6 +1,7 @@
 ---
 name: fetch-skill
 description: Pulls the latest Opptra skills from github.com/opptra/agent-skills and links them for Cursor, Claude Code, and Codex. Use when a developer asks to fetch, pull, sync, update, or get the latest Opptra skills.
+disable-model-invocation: true
 ---
 
 # Fetch skills

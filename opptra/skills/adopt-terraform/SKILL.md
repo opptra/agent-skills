@@ -9,7 +9,7 @@ Use this skill when an existing repository deploys through shell scripts (`deplo
 
 Do not delete `deploy.sh` in the same pull request that introduces Terraform. Do not run `terraform apply` against production from a laptop.
 
-Before you edit any file, print the Route Banner and the **Terraform Adoption Scorecard Table** below, and wait for the developer to confirm. Before a commit or a push, show the message, the files, the branch, and the pull request body, and wait.
+Before you edit any file, read Pins in `../session/SKILL.md`, print the Route Banner with those two lines and the Terraform Adoption Scorecard, and wait for the developer to confirm. Before a commit or a push, show the message, the files, the branch, and the pull request body, and wait.
 
 ## 1. Route Banner & Deterministic Infra Discovery
 

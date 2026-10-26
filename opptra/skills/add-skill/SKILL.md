@@ -1,6 +1,7 @@
 ---
 name: add-skill
 description: Adds a new Opptra skill to the opptra/agent-skills repository and opens a pull request. Use when a developer asks to add, create, or publish a skill for the team.
+disable-model-invocation: true
 ---
 
 # Add a skill
@@ -34,7 +35,7 @@ description: <what it does, in third person>. Use when <the words a developer wo
 
 The description states what the skill does and when to use it. It is third person, specific, and under 1024 characters. It does not say "I can" or "you can".
 
-Keep the file short. Put long reference material in `reference.md` beside `SKILL.md` and link it once. Omit `disable-model-invocation` so the description can start the skill. Set `disable-model-invocation: true` only when the developer says it must be named explicitly.
+Keep the file short. Put long reference material in `reference.md` beside `SKILL.md` and link it once. Omit `disable-model-invocation` on `opptra`, `create-app`, `change-app`, `align-app`, `adopt-terraform`, `feature`, and `bug`. Set `disable-model-invocation: true` on a skill that must be named, including `add-skill`, `modify-skill`, `fetch-skill`, and shared references.
 
 Add one row to the skill table in `README.md`.
 

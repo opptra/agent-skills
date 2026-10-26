@@ -7,7 +7,7 @@ description: Inspects an existing repository with the Opptra 17-point SDLC score
 
 Run this inside the repository the developer has open. Do not create a new repository. Do not delete a deploy script, move a live host, or run `terraform import` without explicit confirmation. Never overwrite existing domain rules under `## Product contract` in `AGENTS.md` or `CLAUDE.md`.
 
-Before you edit any file, print the Route Banner and the two scorecard tables, then wait. Apply only the rows the developer accepts. Before a commit or a push, show the message, the files, the branch, and the pull request body, and wait. Do not invent a Linear ticket id.
+Before you edit any file, read Pins in `../session/SKILL.md`, print the Route Banner with those two lines and the two scorecard tables, then wait. Apply only the rows the developer accepts. Before a commit or a push, show the message, the files, the branch, and the pull request body, and wait. Do not invent a Linear ticket id.
 
 ## 1. Route Banner & Deterministic Scan
 
