@@ -20,7 +20,7 @@ Forbidden in this Route: Editing service.yaml, infra/, .github/workflows/, or cr
 1. **Understand the bug and resolve the Linear ticket.** Follow Resume in `../session/SKILL.md`. Confirm the root cause and fix plan with the developer, then read and follow `../linear-continuity/SKILL.md`. When you create or update the issue, include the reproduction steps, expected result, and actual result. Add a bug note only when that note is not already on the issue. When the developer approves the plan, write `.sdlc/intent.yaml` with `route: bug` and no `depth`, before the test. Do not invent a ticket id.
 2. **Read `service.yaml`, `AGENTS.md` (including `## Product contract`), and `.cursor/rules/*.mdc`:**
    - If the fix needs a product or design choice, stop and follow the `feature` skill, including an OpenSpec.
-   - If the fix requires changing `service.yaml`, `config/jobs.yaml` schedules, `infra/`, or `.github/workflows/`, stop and follow the `change-app` skill.
+   - If the fix requires changing `service.yaml`, `config/jobs.yaml` schedules, `infra/`, or `.github/workflows/`, follow `../change-app/SKILL.md` in this same chat. Open that infra pull request first. Set `.sdlc/intent.yaml` `route` to `bug` and `next_step` to `wait-for-infra`. Write the failing test only after the developer says that pull request has merged.
 3. **Branch (if not already on the active ticket branch):**
    - Branch from `main` as `fix/<ticket-id>-<short-slug>`.
 4. **Failing test first, then minimal fix:**
@@ -28,3 +28,4 @@ Forbidden in this Route: Editing service.yaml, infra/, .github/workflows/, or cr
 5. **Run hooks and local CI (`make ci`):**
    - Run `.githooks/pre-commit` and `make ci` (or `uv run ruff check . && uv run pytest` for Python; `npm run lint && npm run typecheck && npm test --if-present` for UI).
 6. **Push and open (or update) one pull request into `main`** with the Linear link, how to reproduce the bug, and the test name.
+7. **Print the ship card and stop.** Follow Ship card in `../session/SKILL.md`, including the rollback line. Do not push `staging` or open the production pull request unless the developer asks.

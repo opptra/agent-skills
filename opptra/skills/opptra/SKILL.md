@@ -1,6 +1,6 @@
 ---
 name: opptra
-description: Chooses the Opptra route from a sentence when the developer has not named a skill. Use when someone describes a new app, a bug, a feature, an alignment, a Terraform move, or a capability change and does not say which skill to run.
+description: Chooses the Opptra route from a sentence when the developer has not named a skill. Use when someone describes a new app, a bug, a feature, an alignment, a Terraform move, a capability change, or asks whether they are set up, and does not say which skill to run.
 ---
 
 # Opptra
@@ -20,9 +20,10 @@ Route: <skill> | Why: <one sentence>
 | New product behavior | `feature` |
 | Broken or incorrect behavior | `bug` |
 | Fetch or update the team skills | `fetch-skill` |
+| Am I set up, or doctor | `doctor` |
 | Add a team skill | `add-skill` |
 | Change a team skill | `modify-skill` |
 
-A capability change and a product change are two pull requests. Say that `change-app` goes first, then follow `change-app`.
+A capability change and a product change are two pull requests. Stay in this chat. Follow `change-app`, open the infra pull request, and continue the feature or bug after the developer says that pull request has merged. Do not end the chat between them.
 
 If two routes fit and you cannot tell which, ask once.

@@ -13,6 +13,63 @@ When you print a route banner, add two lines:
 - `Skills:` the short commit of the checkout that contains this skill. From that repository run `git rev-parse --short HEAD`. If that fails, print `Skills: unknown`.
 - `Generator:` the short commit of the `opptra/sdlc-resources` clone for this run (`git -C "$tmpdir/sdlc" rev-parse --short HEAD`). Before that clone exists, print `Generator: pending`. After a phase, `.sdlc/state.yaml` field `generator_sha` is the full commit. Print its first 12 characters.
 
+## Generator checkout
+
+Run this before `sdlc.py`. It leaves the generator in `$tmpdir/sdlc`.
+
+Use the recorded commit when `.sdlc/state.yaml` in the app has `generator_sha`. Clone `main` only when that field is missing, or when the developer asks to upgrade the generator. Set `UPGRADE_GENERATOR=1` only for that upgrade. The next phase records the new `generator_sha`.
+
+```bash
+tmpdir=$(mktemp -d)
+repo="$tmpdir/sdlc"
+sha=""
+if [ -f .sdlc/state.yaml ]; then
+  sha=$(python3 -c "import pathlib,re; t=pathlib.Path('.sdlc/state.yaml').read_text(); m=re.search(r'(?m)^generator_sha:\s*(\S+)', t); print(m.group(1) if m else '')")
+fi
+if [ -n "$sha" ] && [ "${UPGRADE_GENERATOR:-}" != "1" ]; then
+  git init "$repo"
+  git -C "$repo" remote add origin https://github.com/opptra/sdlc-resources.git
+  git -C "$repo" fetch --depth 1 origin "$sha"
+  git -C "$repo" checkout --detach FETCH_HEAD
+else
+  git clone --depth 1 --branch main https://github.com/opptra/sdlc-resources.git "$repo"
+fi
+```
+
+Do not leave that checkout on the machine after the phase finishes. `rm -rf "$tmpdir"`.
+
+## OpenSpec pin
+
+Read `OPENSPEC_VERSION` from `opptra/pins.env` in the agent-skills checkout that contains this skill. From `opptra/skills/<name>/` that file is `../../pins.env`. Install that version. Do not pass `@latest`.
+
+```bash
+set -a
+source ../../pins.env
+set +a
+npm install -g "@fission-ai/openspec@${OPENSPEC_VERSION}"
+openspec init --tools cursor,claude
+```
+
+Run the install when `openspec --version` is missing or is not `${OPENSPEC_VERSION}`. Source `opptra/pins.env` from the agent-skills checkout. Do not source a `pins.env` inside the app.
+
+## Ship card
+
+After a feature or bug pull request into `main` is open, print this and stop. Substitute the real branch name. Do not run the push, and do not open the production pull request, unless the developer asks.
+
+```text
+Ship card
+main does not deploy.
+Try staging: git push origin <branch>:staging
+Do not merge main into staging.
+When staging looks right, open a pull request from main into production. That merge deploys production.
+```
+
+On a bug, add this line under the card:
+
+```text
+Rollback is a revert on main, not an older image. Push the revert branch to staging if you need to see it, then open main into production.
+```
+
 ## Resume
 
 `.sdlc/state.yaml` records generator phases. It does not hold a ticket id.
@@ -31,9 +88,11 @@ next_step: openspec
 summary: One sentence of the agreed plan.
 ```
 
-`route` is `feature` or `bug`. `depth` is `express`, `standard`, or `migration` for a feature. A bug omits `depth`. `next_step` is `plan`, `openspec`, `test`, `code`, `ci`, or `pr`.
+`route` is `feature` or `bug`. `depth` is `express`, `standard`, or `migration` for a feature. A bug omits `depth`. `next_step` is `plan`, `openspec`, `test`, `code`, `ci`, `pr`, or `wait-for-infra`.
 
 If `plan_approved` is true and `branch` is the current branch, continue at `next_step`. Do not ask for the plan again. If `route` does not match the skill you are running, stop and say so.
+
+When `next_step` is `wait-for-infra`, do not write product code. Continue the feature or bug after the developer says the infra pull request has merged.
 
 When the developer approves the plan, write this file before product code. Update `next_step` as each stage finishes.
 

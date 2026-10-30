@@ -20,11 +20,7 @@ Script-Owned Paths: infra/, .github/workflows/, managed rule blocks in AGENTS.md
 
 1. **Plan first and resolve the Linear ticket.** Agree the capability or schedule change with the developer, then read and follow `../linear-continuity/SKILL.md`. When you create or update the issue, include the planned `service.yaml` changes. Do not invent a ticket id.
 2. Read `service.yaml`. If `service.yaml` is missing, stop and run `align-app` first.
-3. Clone `main` of `opptra/sdlc-resources` into a temporary directory:
-   ```bash
-   tmpdir=$(mktemp -d)
-   git clone --depth 1 --branch main https://github.com/opptra/sdlc-resources.git "$tmpdir/sdlc"
-   ```
+3. Run Generator checkout from `../session/SKILL.md`. It sets `$tmpdir` and `$tmpdir/sdlc`. Reuse `generator_sha` when `.sdlc/state.yaml` has one. Clone `main` only when it is missing or the developer asks to upgrade the generator.
 
 ## 2. Apply in Phases
 
@@ -43,3 +39,4 @@ Script-Owned Paths: infra/, .github/workflows/, managed rule blocks in AGENTS.md
 4. Do not hand-edit `infra/` or `.github/workflows/`.
 5. Run `.githooks/pre-commit` and `make ci` (plus `uv run ruff check . && uv run pytest` for any component touched). Never pass `--no-verify` to `git commit` or `git push`.
 6. Push the branch and open one pull request into `main`. Read the `terraform plan` comment on the pull request and stop if any unexpected resource destroy appears.
+7. When this skill was entered from `feature` or `bug`, stay in that chat. Set `.sdlc/intent.yaml` `next_step` to `wait-for-infra` and stop before product code. Product code starts after the developer says this pull request has merged.

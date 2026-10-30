@@ -22,10 +22,10 @@ Forbidden in this Route: Editing service.yaml, infra/, .github/workflows/, or cr
 1. **Understand, plan first, and resolve the Linear ticket.** Follow Resume in `../session/SKILL.md`. Then read and follow `../linear-continuity/SKILL.md`. Choose depth from Depth in `../session/SKILL.md`. When you create or update the issue, include the agreed title, requirements, and acceptance criteria. When the developer approves the plan, write `.sdlc/intent.yaml` before product code. Do not invent a ticket id.
 2. **Verify alignment and capabilities:**
    - Read `service.yaml`, `AGENTS.md` (including `## Product contract`), and `.cursor/rules/*.mdc` (and run `python3 scripts/sdlc.py status --check` if `scripts/sdlc.py` is present).
-   - If the feature requires a new cloud resource, database, bucket, queue, secret ID, job entrypoint, or cron schedule change in `service.yaml`, stop and route that part to `change-app` in a separate pull request first.
+   - If the feature requires a new cloud resource, database, bucket, queue, secret ID, job entrypoint, or cron schedule change in `service.yaml`, follow `../change-app/SKILL.md` in this same chat. Open that infra pull request first. Set `.sdlc/intent.yaml` `next_step` to `wait-for-infra`. Do not write product code until the developer says that pull request has merged. Then continue here on `feat/<ticket-id>-<slug>`. The two pull requests stay separate. The chat does not end between them.
    - Note the active capabilities (`postgres`, `firestore`, `bigquery`, `bucket`, `queue`, `scheduled-jobs`, `ui`, `api`) so the OpenSpec and tests enforce their rules (`database.mdc`, `firestore.mdc`, `bigquery.mdc`, `job.mdc`, `react.mdc`, and `## Product contract`).
 3. **Ensure OpenSpec is ready** for `standard` and `migration`. Skip this step on `express`.
-   - Run `openspec --version`. If missing, install `@fission-ai/openspec@latest`. If `openspec/` is missing, run `openspec init --tools cursor,claude`.
+   - Follow OpenSpec pin in `../session/SKILL.md`. If `openspec/` is missing, run `openspec init --tools cursor,claude`. Do not install `@latest`.
 4. **Branch (if not already on the ticket's feature branch):**
    - Branch from `main` as `feat/<ticket-id>-<short-slug>`.
 5. **Write or update the OpenSpec and sync it to Linear** for `standard` and `migration`. On `express`, skip this step and set `next_step` to `test`. On `migration`, do not re-ask a decision the local plan already fixed.
@@ -40,3 +40,4 @@ Forbidden in this Route: Editing service.yaml, infra/, .github/workflows/, or cr
    - Run `.githooks/pre-commit` and `make ci` (or `uv run ruff check . && uv run pytest` for Python; `npm run lint && npm run typecheck && npm test --if-present` for UI). Fix any failures before asking to commit.
 8. **Commit, push, and open the pull request:**
    - Push the branch and open (or update) one pull request into `main` with the Linear link, the OpenSpec path when there is one, what changed, commands run, and the risk box.
+9. **Print the ship card and stop.** Follow Ship card in `../session/SKILL.md`. Do not push `staging` or open the production pull request unless the developer asks.

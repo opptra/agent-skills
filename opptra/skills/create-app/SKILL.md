@@ -7,7 +7,7 @@ description: Scaffolds a new Opptra app by reading the Linear issue and any loca
 
 You fill in facts, run the deterministic phase scripts in `opptra/sdlc-resources`, and customize the application entrypoints, data helpers, and unit tests in between. The generator decides `infra/`, `.github/workflows/`, and the managed rule blocks. Never hand-edit `.github/workflows/` or `infra/`.
 
-Do not create the empty GitHub repository. The developer creates that. When they give its URL, set the remote and push `main`, `staging`, and `production`. Do not run `scripts/bind-repo.sh` unless they say they have permission and ask you to run it. Do not run `protect-branches.sh`. Branch protection is an organization ruleset. Do not leave a checkout of `opptra/sdlc-resources` on the machine.
+Create the GitHub repository only after `make dev` passes and the developer says yes. It is a private repository in `opptra`. Then push `main`, `staging`, and `production`, and create the GitHub environments `staging` and `production`. Do not run `scripts/bind-staging.sh` or `scripts/bind-production.sh` unless they say they have permission and ask you to. Staging bind does not need production IAM. Production bind is a file they send to someone who can change IAM in `prod_project`. Do not run `protect-branches.sh`. Branch protection is an organization ruleset. Do not leave a checkout of `opptra/sdlc-resources` on the machine.
 
 Apps Script is not a choice. If the whole request is only Apps Script, say so and stop. When part of a request needs something the platform does not generate yet (such as project-level billing budgets), scaffold every part the platform does support and record the gap under `unmet` in `service.yaml` with a clear recommendation.
 
@@ -17,7 +17,7 @@ Read Pins in `../session/SKILL.md`. Print the route banner first, including thos
 
 ```text
 Route: create-app | Phases: 1. Manifest  2. Runtime & OpenSpec  3. Data/Cloud  4. Tests  5. Infra/CI/Rules
-Human Gates: After the 17-Point Blueprint Table, and after Phase 5 (Walking Skeleton)
+Human Gates: After the short blueprint (archetype, name, auth, data, prod project), after make dev, before creating the GitHub repo, and before either bind script
 Script-Owned Paths: infra/, .github/workflows/, managed rule blocks in AGENTS.md & CLAUDE.md
 ```
 
@@ -42,18 +42,15 @@ Script-Owned Paths: infra/, .github/workflows/, managed rule blocks in AGENTS.md
   - `secrets: [<id>, ...]` for Secret Manager shells (IDs only, never values)
   - `alerts: true` for failed job / error log alert policies
 
-## 2. Show the 17-Point Blueprint Table & Wait for Confirmation
+## 2. Confirm the short blueprint and wait
 
-Before writing any files, present the 17-point blueprint table in `reference.md` and wait for the developer to confirm.
+Before writing any files, confirm archetype, name, auth, data store, `prod_project`, and any `unmet` gap. Ask one question at a time for what is still missing. Wait for a yes.
+
+The 17-point table in `reference.md` is the receipt. Print it after phase 5 from `sdlc.py status --table`. Do not walk all 17 rows before writing files.
 
 ## 3. Execute the 5 Phases (`script → skill → check`)
 
-Clone `main` of `opptra/sdlc-resources` into a temporary directory:
-
-```bash
-tmpdir=$(mktemp -d)
-git clone --depth 1 --branch main https://github.com/opptra/sdlc-resources.git "$tmpdir/sdlc"
-```
+Run Generator checkout from `../session/SKILL.md`. It sets `$tmpdir` and `$tmpdir/sdlc`. A new app has no `generator_sha` yet, so this first run clones `main`. A resume reuses the recorded sha unless the developer asks to upgrade the generator.
 
 ### Phase 1: Manifest (`check`)
 Write `service.yaml` and validate it:
@@ -66,14 +63,7 @@ python3 "$tmpdir/sdlc/scripts/sdlc.py" check "<target-dir>/service.yaml"
    ```bash
    python3 "$tmpdir/sdlc/scripts/sdlc.py" init-runtime "$tmpdir/service.yaml" "<target-dir>" --overwrite
    ```
-2. Install OpenSpec and initialize it in the app. An empty `openspec/` directory is not enough. From `<target-dir>`:
-   ```bash
-   if ! openspec --version; then
-     npm install -g @fission-ai/openspec@latest
-   fi
-   openspec init --tools cursor,claude
-   ```
-   If `npm install` or `openspec init` fails, fix that before Phase 3. Do not leave this as a later recommendation.
+2. Install the pinned OpenSpec and initialize it in the app. Follow OpenSpec pin in `../session/SKILL.md`. An empty `openspec/` directory is not enough. Run the install and `openspec init --tools cursor,claude` from `<target-dir>`. If install or init fails, fix that before Phase 3. Do not leave this as a later recommendation. Do not install `@latest`.
 3. Confirm Linear is connected in Cursor or Claude and that the named issue can be read. Linear is not an app package. It is the IDE connection the later skills use for the ticket id. If it is not connected, connect it in this phase and re-read the issue. Do not invent a ticket id, and do not finish the scaffold while the issue still cannot be read.
 4. Customize the runtime files to match the domain (add required OS packages to `Dockerfile`, wire job entrypoints or initial API/UI routes, and scaffold any migration CLI under `tools/`).
 
@@ -114,7 +104,7 @@ Do not stop after `status --table` alone. Add a second table, **Built and still 
 
 | Item | In the scaffold? | Why | What you do next |
 |---|---|---|---|
-| Example: eight Cloud Run jobs | Yes | The plan listed them, so the scaffold created the jobs, commands, and crons | Try them with a direct push to staging after bind-repo.sh |
+| Example: eight Cloud Run jobs | Yes | The plan listed them, so the scaffold created the jobs, commands, and crons | Try them with a direct push to staging after bind-staging.sh |
 | Example: laptop handler code | No | The scaffold is the platform shell. Porting behaviour is a feature | One `/feature` pull request per cutover slice |
 
 Mark each row Yes or No. A Yes row says why it was included. A No row says it was left out on purpose and what the next pull request is. Include `unmet` items as No.
@@ -126,27 +116,33 @@ Say what was created: app name, directory, workloads, data store, bucket, queue,
 ### Next steps, in this order
 
 1. **Run and verify locally first (`make setup && make dev && make test`).**
-   The scaffold generated `.env.example`, `Makefile`, and `backend/app/config.py` (which reads `.env` when `APP_ENV=local` and Secret Manager in the cloud). Copy `.env.example` to `.env`, fill in any local test values, and run `make setup`, `make dev`, and `make test` on your machine before deploying.
-2. **Build your first feature slice locally with `/feature`.**
-   The scaffold is the platform shell. Port or build product behaviour one `/feature` pull request at a time.
-3. **Connect the empty GitHub repository when ready to push.**
-   Ask whether the empty GitHub repository already exists. If they paste a URL now or in a later message, store it and push the three branches. Accept `https://github.com/org/repo`, `git@github.com:org/repo.git`, or `org/repo`.
+   The scaffold generated `.devcontainer/devcontainer.json`, `.env.example`, `Makefile`, and `backend/app/config.py` (which reads `.env` when `APP_ENV=local` and Secret Manager in the cloud). Copy `.env.example` to `.env`, fill in any local test values, and run `make setup`, `make dev`, and `make test` on your machine before any GitHub step. Stop here until those commands pass.
+2. **Create the private GitHub repository only after they say yes.**
+   Ask once: create private `opptra/<name>`? On yes, from the app directory:
    ```bash
-   python3 scripts/sdlc.py set-github-repo "<url>" .
    git init
    git add .
    git commit -m "feat: <ticket-id> scaffold"
    git branch -M main
-   git remote add origin "<url>"
-   git push -u origin main
+   gh repo create opptra/<name> --private --source=. --remote=origin --push
    git branch staging
    git branch production
    git push -u origin staging
    git push -u origin production
+   gh api --method PUT "repos/opptra/<name>/environments/staging"
+   gh api --method PUT "repos/opptra/<name>/environments/production"
    ```
-   If `origin` already exists, use `git remote set-url origin "<url>"`. If a branch already exists on the remote, do not force-push. If they do not have a repository yet, stop this step and continue when they send the URL. Read `.sdlc/state.yaml` on a later turn so you do not re-ask the scaffold facts.
-4. **Explain `scripts/bind-repo.sh` before anyone runs it.** It lets GitHub Actions for this repository impersonate a deployer service account in the production project and in `opptra-staging`. That account can push the image and apply Terraform. The script does not deploy. A direct push to `staging` deploys staging. A pull request from `main` into `production` is the only deploy that comes from `main`. Do not merge `main` into `staging`. Branch protection is already an organization ruleset, so this script does not protect branches. The developer runs `scripts/bind-repo.sh` if they can change IAM in those projects. Otherwise they give that file to someone who can. Do not run it yourself unless they say they have permission and ask you to.
-5. **Test on `staging`, then promote `main` to `production`.** After the bind script has succeeded, push the branch you want to try directly to `staging` and read the Terraform plan. Confirm the jobs, schedules, and webhook match `service.yaml`. A disabled job must have no Scheduler entry. Merging to `main` does not update staging.
+   Run Generator checkout again and record the slug. `sdlc.py` is not copied into the app:
+   ```bash
+   python3 "$tmpdir/sdlc/scripts/sdlc.py" set-github-repo "opptra/<name>" .
+   rm -rf "$tmpdir"
+   ```
+   If `origin` already exists, use `git remote set-url origin`. If a branch already exists on the remote, do not force-push. If they say no, stop. The app stays local. Read `.sdlc/state.yaml` on a later turn so you do not re-ask the scaffold facts.
+3. **Explain the two bind scripts. Do not run them unless they ask.**
+   `scripts/bind-staging.sh` needs IAM on `opptra-staging` only. `scripts/bind-production.sh` is for someone who can change IAM in `prod_project`. Neither script deploys, and neither protects branches. A direct push to `staging` deploys staging. A pull request from `main` into `production` is the only deploy that comes from `main`. Do not merge `main` into `staging`. The steps are in `docs/bind.md` of `opptra/sdlc-resources`.
+4. **Build the first feature slice locally with `/feature`.**
+   The scaffold is the platform shell. Port or build product behaviour one `/feature` pull request at a time.
+5. **Try staging only after bind-staging has succeeded and they ask.** Push the branch directly to `staging` and read the Terraform plan. Confirm the jobs, schedules, and webhook match `service.yaml`. A disabled job must have no Scheduler entry. Merging to `main` does not update staging. Then print the ship card from `../session/SKILL.md`.
 6. **Put secret values into Secret Manager and close `unmet` items.** The scaffold only created secret ids. Close each `unmet` item (such as a data import or project billing budget) in its own pull request.
 
 If those feature slices are already known, ask **once**: pause for review after each slice, or run each slice through its checks without stopping.

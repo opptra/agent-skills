@@ -4,13 +4,13 @@
     "name": "Opptra"
   },
   "metadata": {
-    "description": "Opptra agent skills for creating apps, adopting Terraform, changing capabilities/schedules, implementing features, fixing bugs, aligning existing apps, and managing team skills."
+    "description": "Opptra agent skills for creating apps, adopting Terraform, changing capabilities/schedules, implementing features, fixing bugs, aligning existing apps, checking a laptop, and managing team skills."
   },
   "plugins": [
     {
       "name": "opptra",
       "source": "opptra",
-      "description": "Create an app, adopt Terraform, change capabilities or schedules, implement a feature, fix a bug, align an existing app, add a skill, change a skill, or fetch the latest Opptra skills."
+      "description": "Create an app, adopt Terraform, change capabilities or schedules, implement a feature, fix a bug, align an existing app, check a laptop, add a skill, change a skill, or fetch the latest Opptra skills."
     }
   ]
 }

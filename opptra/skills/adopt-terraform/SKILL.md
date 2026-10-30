@@ -23,10 +23,8 @@ Script-Owned Paths: infra/main.tf, infra/variables.tf, infra/outputs.tf, .github
 ```
 
 1. **Plan first and resolve the Linear ticket.** Agree the Terraform adoption plan with the developer, then read and follow `../linear-continuity/SKILL.md`. When you create or update the issue, include the adoption scorecard summary. Do not invent a ticket id.
-2. Clone `main` of `opptra/sdlc-resources` into a temporary directory and run `discover-infra`:
+2. Run Generator checkout from `../session/SKILL.md`. It sets `$tmpdir` and `$tmpdir/sdlc`. Reuse `generator_sha` when `.sdlc/state.yaml` has one. Then run `discover-infra`:
    ```bash
-   tmpdir=$(mktemp -d)
-   git clone --depth 1 --branch main https://github.com/opptra/sdlc-resources.git "$tmpdir/sdlc"
    python3 "$tmpdir/sdlc/scripts/sdlc.py" discover-infra . --json
    python3 "$tmpdir/sdlc/scripts/sdlc.py" discover-infra . --table
    ```
@@ -63,7 +61,7 @@ Ask the developer to confirm which resources already exist in `prod_project` (to
 
 End with a summary of the Terraform modules and `import {}` blocks generated, followed by the cutover steps in order:
 
-1. **Bind the repository to GCP (if not done yet):** Run `scripts/bind-repo.sh` if you can change IAM in `prod_project` and `opptra-staging`, or hand that script to someone who can. It creates `<app>-deployer` and prints the four `WIF_*` GitHub Actions variables.
+1. **Bind staging before production.** `scripts/bind-staging.sh` needs IAM on `opptra-staging` only. It creates `<app>-deployer` there and prints `WIF_PROVIDER_STAGING` and `WIF_SERVICE_ACCOUNT_STAGING`. Do not run it unless the developer asks. `scripts/bind-production.sh` is for someone who can change IAM in `prod_project`. Staging can be tried before that production bind exists.
 2. **Push the branch directly to `staging` first:** Verify the staging build and Terraform apply create/update the staging resources cleanly. Do not merge `main` into `staging`.
 3. **Open the pull request into `main` and read the `terraform plan` comment:** Confirm the plan imports existing resources in place and shows **0 to destroy** on databases, buckets, and live services.
 4. **Promote `main` to `production`:** Open a pull request from `main` into `production` and merge it.

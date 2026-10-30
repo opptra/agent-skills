@@ -1,11 +1,11 @@
 # 17-point blueprint
 
-Present this table before writing any files, then wait for the developer to confirm.
+Print this table after phase 5, from `sdlc.py status --table`. It is the receipt. Before any files, confirm only archetype, name, auth, data store, and prod project.
 
 | # | Area | Planned Setup for This App |
 |---|---|---|
 | **1** | **Components & Architecture** | Component names, archetypes, regions, and parts |
-| **2** | **OpenSpec Setup** | Install `@fission-ai/openspec` if missing, then `openspec init --tools cursor,claude` in the app |
+| **2** | **OpenSpec Setup** | Install the pinned `@fission-ai/openspec` from `opptra/pins.env`, then `openspec init --tools cursor,claude` in the app |
 | **3** | **Linear Setup** | Connect Linear in Cursor or Claude and read the issue before the scaffold is called done |
 | **4** | **`service.yaml` Manifest** | Root `service.yaml` + any `unmet` items and recommendations |
 | **5** | **Agentic Rules (5.1–5.10)** | All 10 rule pillars (`TDD`, `Commit/PR`, `Linear`, `OpenSpec`, `Infra/Terraform`, `Workflows`, `JSON Logging`, `Data Safety`, `Secrets/PII`, plus any domain edge cases under `## Product contract`) |

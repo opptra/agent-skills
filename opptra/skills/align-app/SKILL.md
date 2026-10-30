@@ -22,11 +22,9 @@ Protected Content: Existing Product Contract in AGENTS.md/CLAUDE.md and custom R
 
 If `.sdlc/state.yaml` exists in the repository, read it and offer to resume from the last completed phase. That file records generator progress. It does not hold a Linear ticket id.
 
-Clone `main` of `opptra/sdlc-resources` into a temporary directory and run `sdlc.py status`:
+Run Generator checkout from `../session/SKILL.md`. It sets `$tmpdir` and `$tmpdir/sdlc`. Reuse `generator_sha` when `.sdlc/state.yaml` has one. Then run `sdlc.py status`:
 
 ```bash
-tmpdir=$(mktemp -d)
-git clone --depth 1 --branch main https://github.com/opptra/sdlc-resources.git "$tmpdir/sdlc"
 python3 "$tmpdir/sdlc/scripts/sdlc.py" status . --json
 python3 "$tmpdir/sdlc/scripts/sdlc.py" status . --table
 ```
@@ -42,31 +40,34 @@ Inspect the repository layout (`Dockerfile`, `deploy/`, `pyproject.toml`, `requi
 
 Always present both tables from `sdlc.py status --table`. That output is the 17-point scorecard and the 10 rule pillars. Every row has a last column, **What this means for you**. Keep that column. If the default sentence does not match this repo, rewrite it in plain language: what the row is checking, and what the developer will do differently once that row is in place. When you fill a row by hand, use the columns in `reference.md`.
 
-Ask the developer which rows to apply now (recommending all safe non-host-moving rows `1–7`, `9–12`, `14`, plus initializing `openspec/`).
+Offer three paths and one recommendation. Wait for one yes. Do not ask them to tick 17 rows. The scorecard is the receipt.
 
-## 3. Apply Selected Rows & Verify
+| Path | When | What you do |
+|---|---|---|
+| Ship today | They only need a bug or feature merged | Remove `$tmpdir` and stop. Write no files. Tell them to use `bug` or `feature`. |
+| Make the agent safe | They said align, and the host can stay | Recommend this when `deploy.sh`, `vercel.json`, `fly.toml`, or `cloudbuild.yaml` is present, and whenever they did not ask to move the host. Apply the steps in section 3. |
+| Move the host | They want Terraform to replace the current deploy | Follow `../adopt-terraform/SKILL.md` in this same chat. Do not delete `deploy.sh` in the pull request that introduces Terraform. |
+
+Inside Make the agent safe, honor a single exception such as "skip OpenSpec". Do not turn that into a row-by-row interview.
+
+## 3. Apply the accepted path
+
+Path 1 writes nothing. Path 3 follows `adopt-terraform`. Path 2 does the steps below. If the repo still deploys through `deploy/*.sh`, `vercel.json`, `fly.toml`, or `cloudbuild.yaml`, pass `--ci-only` and leave that deploy path in place.
 
 1. Write `service.yaml` and validate with `python3 "$tmpdir/sdlc/scripts/sdlc.py" check service.yaml`.
-2. If the repo still deploys via legacy scripts (`deploy/*.sh`, `vercel.json`, `fly.toml`) and the developer did not ask to generate Terraform `infra/` in this turn, run:
+2. For a legacy deploy path, run:
    ```bash
    python3 "$tmpdir/sdlc/scripts/sdlc.py" sync-infra service.yaml . --ci-only
    ```
-   Otherwise, run the selected phases (`add-data`, `add-tests`, `sync-infra`).
-3. If the developer accepted OpenSpec setup and `openspec` CLI is installed, run `openspec init --tools cursor,claude` (or create `openspec/`).
+   When there is no legacy deploy path, run `add-data`, `add-tests`, and `sync-infra` without `--ci-only`.
+3. Install the pinned OpenSpec unless they skipped it. Follow OpenSpec pin in `../session/SKILL.md`. Do not install `@latest`. Then run `openspec init --tools cursor,claude` when `openspec/` is missing or only contains `.gitkeep`.
 4. Create `staging` and `production` branches from `main` when missing.
-5. If the developer accepted the OpenSpec row, or `openspec/` is missing or only contains `.gitkeep`, install and initialize it in this repository. Do not leave it as a recommendation.
-   ```bash
-   if ! openspec --version; then
-     npm install -g @fission-ai/openspec@latest
-   fi
-   openspec init --tools cursor,claude
-   ```
-6. If the Linear rule is missing from the scorecard, or the Linear connection cannot read an issue, connect Linear in Cursor or Claude in this turn. Read and follow `../linear-continuity/SKILL.md`. When you create or update the issue, include the alignment plan and the rows the developer accepted. Do not invent a ticket id.
-7. **Run and verify the generated `.githooks/` and `make ci`:**
+5. If the Linear rule is missing from the scorecard, or the Linear connection cannot read an issue, connect Linear in Cursor or Claude in this turn. Read and follow `../linear-continuity/SKILL.md`. When you create or update the issue, include the alignment plan and the path they accepted. Do not invent a ticket id.
+6. **Run and verify the generated `.githooks/` and `make ci`:**
    - Run `.githooks/pre-commit` and `make ci`.
    - Fix any auto-resolvable lint, formatting, or wiring issues automatically and re-run until green.
    - If a check fails due to something that cannot be resolved without user input (such as legacy code errors, missing external credentials, or tests requiring external services), explain the exact failure to the developer and ask whether to **(a)** provide input / fix those files now or **(b)** disable that specific check (`run_tests: false` or `run_lint: false`) in `service.yaml` and record it under `unmet` so commits and PRs are not blocked.
-8. Re-run `python3 "$tmpdir/sdlc/scripts/sdlc.py" status . --table` and `--check`, then delete `$tmpdir`.
+7. Re-run `python3 "$tmpdir/sdlc/scripts/sdlc.py" status . --table` and `--check`, then delete `$tmpdir`.
 
 ## 4. Summary and next steps
 
@@ -80,8 +81,8 @@ Say which scorecard rows changed, whether OpenSpec is initialized, and whether L
 
 1. Commit the accepted alignment on a branch and open one pull request into `main`.
 2. Connect anything still red on OpenSpec or Linear before the next `/feature` or `/bug`.
-3. When this alignment added a deploy workflow, `scripts/bind-repo.sh` is in the repo with the production project filled in. Explain it: the script lets GitHub Actions impersonate a deployer account and apply Terraform. It does not deploy, and it does not protect branches. Organization rules cover `main` and `production`. The developer runs the script if they can change IAM. Otherwise they give the file to someone who can. Do not run `protect-branches.sh`.
-4. If `origin` is missing and the developer gives a repository URL now or later, set the remote and push `main`, `staging`, and `production` from the current commit. Record the URL with `python3 scripts/sdlc.py set-github-repo "<url>" .`. Do not force-push. Do not create the empty GitHub repository.
-5. After `scripts/bind-repo.sh` has succeeded, try staging by pushing a branch directly to `staging`. Do not merge `main` into `staging`. Production is a pull request from `main` into `production`.
+3. When this alignment added a deploy workflow, explain `scripts/bind-staging.sh` and `scripts/bind-production.sh`. Staging bind needs IAM on `opptra-staging` only. Production bind goes to someone who can change IAM in `prod_project`. Neither script deploys, and neither protects branches. Do not run either script unless they ask. Do not run `protect-branches.sh`.
+4. If `origin` is missing, ask once. On yes, create a private `opptra/<name>` the way `create-app` does, and push `main`, `staging`, and `production`. If they paste an existing URL, set the remote and push those branches. Do not force-push. Record the slug with Generator checkout and `python3 "$tmpdir/sdlc/scripts/sdlc.py" set-github-repo "<url>" .`, then delete `$tmpdir`.
+5. After `scripts/bind-staging.sh` has succeeded, try staging by pushing a branch directly to `staging`. Do not merge `main` into `staging`. Production is a pull request from `main` into `production`. Print the ship card from `../session/SKILL.md`.
 6. Move laptop or other legacy deploy scripts (`deploy.sh`, `cloudbuild.yaml`, `vercel.json`, `fly.toml`) to Terraform with `/adopt-terraform` before deleting them.
 7. Port or fix product behaviour with `/feature` and `/bug`. Those skills expect OpenSpec and a real Linear issue.
