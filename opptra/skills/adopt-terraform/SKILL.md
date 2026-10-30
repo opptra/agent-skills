@@ -23,23 +23,24 @@ Script-Owned Paths: infra/main.tf, infra/variables.tf, infra/outputs.tf, .github
 ```
 
 1. **Plan first and resolve the Linear ticket.** Agree the Terraform adoption plan with the developer, then read and follow `../linear-continuity/SKILL.md`. When you create or update the issue, include the adoption scorecard summary. Do not invent a ticket id.
-2. Run Generator checkout from `../session/SKILL.md`. It sets `$tmpdir` and `$tmpdir/sdlc`. Reuse `generator_sha` when `.sdlc/state.yaml` has one. Then run `discover-infra`:
+2. Run Generator checkout from `../session/SKILL.md`. It sets `$tmpdir` and `$tmpdir/sdlc`. Reuse `generator_sha` when `.sdlc/state.yaml` has one. Then run `discover-infra` (and `--propose-manifest` if `service.yaml` does not exist yet):
    ```bash
    python3 "$tmpdir/sdlc/scripts/sdlc.py" discover-infra . --json
    python3 "$tmpdir/sdlc/scripts/sdlc.py" discover-infra . --table
+   python3 "$tmpdir/sdlc/scripts/sdlc.py" discover-infra . --propose-manifest
    ```
 
 ## 2. Present the Terraform Adoption Scorecard Table
 
-Inspect the output of `discover-infra` alongside any Dockerfiles, `deploy/*.sh`, `scripts/`, and `service.yaml` in the repo. Present the **Terraform Adoption Scorecard Table** so the developer sees every GCP resource that will be managed:
+Inspect the output of `discover-infra` alongside any Dockerfiles, `deploy/*.sh`, `cloudbuild.yaml`, `.env.example`, `scripts/`, and `service.yaml` in the repo. Present the **Terraform Adoption Scorecard Table** so the developer sees every GCP resource that will be managed:
 
 | Resource Found | Type & Settings (Region, Memory, Timeout, Auth) | Where It Lives Today | Target Terraform Module | Action (`Create` vs `Import`) | What this means for you |
 |---|---|---|---|---|---|
 | Example: `pm-dashboard` | Cloud Run Service (`asia-southeast1`, `iap`) | `deploy/dashboard/deploy.sh` | `modules/cloud-run-service` | **Import** if live in `prod_project`, **Create** in `opptra-staging` | Replaces `gcloud run deploy` with Terraform; importing prevents a duplicate service |
 | Example: `noon-hourly` | Cloud Run Job (`asia-south1`, `2Gi`, `3000s`, cron) | `deploy/noon-pipeline/deploy.sh` | `modules/cloud-run-job` + `modules/schedule` | **Import** job, **Create/Sync** Scheduler | Cron schedules and job settings become PR-reviewed changes in `service.yaml` |
-| Example: `slack-bot-token` | Secret Manager secret ID | `--set-secrets` in `deploy.sh` | `modules/secrets` | **Import** secret shell (versions untouched) | Grants runtime service account `secretAccessor` without storing secret values in Git |
+| Example: `slack-bot-token` | Secret Manager secret ID | `--set-secrets` in `deploy.sh` | `modules/secrets` | **Import** secret shell via `secret_map` (versions untouched) | Grants runtime service account `secretAccessor` without renaming live secrets or storing values in Git |
 
-Also highlight any custom flags in `deploy.sh` (such as per-component regions, `--memory`, `--timeout`, unprefixed legacy resource names vs `<prefix>-<resource>`, or `unmet` items like external BigQuery datasets) and explain how they map into `service.yaml`.
+Also highlight any custom flags in `deploy.sh` or `cloudbuild.yaml` (such as per-component regions, `--memory`, `--timeout`, unprefixed legacy resource names mapped via `legacy_service_name` and `secret_map: { ENV_VAR: existing-secret-id }`, or `unmet` items like external BigQuery datasets) and explain how they map into `service.yaml`. Note that `sdlc.py sync-infra` preserves `infra/imports.tf` and `infra/imports.tf.example` across re-runs.
 
 Ask the developer to confirm which resources already exist in `prod_project` (to be imported) versus which are brand new.
 

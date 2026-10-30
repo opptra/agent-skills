@@ -16,13 +16,13 @@ Apps Script is not a choice. If the whole request is only Apps Script, say so an
 Read Pins in `../session/SKILL.md`. Print the route banner first, including those two lines, so the developer knows the phases and gates:
 
 ```text
-Route: create-app | Phases: 1. Manifest  2. Runtime & OpenSpec  3. Data/Cloud  4. Tests  5. Infra/CI/Rules
-Human Gates: After the short blueprint (archetype, name, auth, data, prod project), after make dev, before creating the GitHub repo, and before either bind script
+Route: create-app | Phases: 1. Manifest  2. Runtime & OpenSpec  3. Data/Cloud  4. Tests  5. Infra/CI/Rules & Local Verification
+Human Gates: Gate 1 — Approve short blueprint; Gate 2 — Create private GitHub repo after local make ci passes (and before any bind script)
 Script-Owned Paths: infra/, .github/workflows/, managed rule blocks in AGENTS.md & CLAUDE.md
 ```
 
 1. **Resume check:** If `.sdlc/state.yaml` already exists in the target directory, read it and offer to resume from the next uncompleted phase instead of re-interviewing.
-2. **Linear:** Read and follow `../linear-continuity/SKILL.md` before creating or updating a Linear issue. Agree the 17-point blueprint in `reference.md` first. When you create or update the issue, include that blueprint, the requirements, and the acceptance criteria. Do not invent a ticket id. `.sdlc/state.yaml` is only for resuming a phase, not for a ticket id.
+2. **Linear:** Read and follow `../linear-continuity/SKILL.md` before creating or updating a Linear issue. Agree the 17-point blueprint in `reference.md` first. When you create or update the issue, include that blueprint, the requirements, and the acceptance criteria. If Linear MCP is not connected yet, use `LOCAL-DRAFT` so local scaffolding and verification can finish without blocking, and connect Linear before creating the GitHub repository or opening a pull request. `.sdlc/state.yaml` is only for resuming a phase, not for a ticket id.
 3. **Local plan check:** Check the current directory for an existing migration or architecture plan (such as `MIGRATION_PLAN.md`). Treat every decision already stated in that plan—region, jobs, crons, Firestore vs Postgres vs BigQuery, buckets, queues, webhook receiver, secrets, domain edge cases—as answered. Do not re-ask what the plan already fixed.
 4. **Ask only what is missing:** Ask one question at a time in plain language using the structured question tool in Cursor.
 
@@ -48,9 +48,9 @@ Before writing any files, confirm archetype, name, auth, data store, `prod_proje
 
 The 17-point table in `reference.md` is the receipt. Print it after phase 5 from `sdlc.py status --table`. Do not walk all 17 rows before writing files.
 
-## 3. Execute the 5 Phases (`script → skill → check`)
+## 3. Execute All 5 Phases Autonomously (`script → skill → check`)
 
-Run Generator checkout from `../session/SKILL.md`. It sets `$tmpdir` and `$tmpdir/sdlc`. A new app has no `generator_sha` yet, so this first run clones `main`. A resume reuses the recorded sha unless the developer asks to upgrade the generator.
+Once the developer approves the short blueprint (Gate 1), run Phases 1 through 5 in a single autonomous turn without stopping between phases. Run Generator checkout from `../session/SKILL.md`. It sets `$tmpdir` and `$tmpdir/sdlc` from the local cache. A new app has no `generator_sha` yet, so this first run uses `main`. A resume reuses the recorded sha unless the developer asks to upgrade the generator.
 
 ### Phase 1: Manifest (`check`)
 Write `service.yaml` and validate it:
@@ -63,8 +63,9 @@ python3 "$tmpdir/sdlc/scripts/sdlc.py" check "<target-dir>/service.yaml"
    ```bash
    python3 "$tmpdir/sdlc/scripts/sdlc.py" init-runtime "$tmpdir/service.yaml" "<target-dir>" --overwrite
    ```
+   (`init-runtime --overwrite` only updates skeleton runtime directories and preserves any existing `.git/`, `.sdlc/`, `openspec/`, or `*PLAN*.md` files.)
 2. Install the pinned OpenSpec and initialize it in the app. Follow OpenSpec pin in `../session/SKILL.md`. An empty `openspec/` directory is not enough. Run the install and `openspec init --tools cursor,claude` from `<target-dir>`. If install or init fails, fix that before Phase 3. Do not leave this as a later recommendation. Do not install `@latest`.
-3. Confirm Linear is connected in Cursor or Claude and that the named issue can be read. Linear is not an app package. It is the IDE connection the later skills use for the ticket id. If it is not connected, connect it in this phase and re-read the issue. Do not invent a ticket id, and do not finish the scaffold while the issue still cannot be read.
+3. If Linear is connected in Cursor or Claude, read or update the named issue. If Linear is not connected yet, record `LOCAL-DRAFT` and remind the developer to connect Linear before pushing to GitHub.
 4. Customize the runtime files to match the domain (add required OS packages to `Dockerfile`, wire job entrypoints or initial API/UI routes, and scaffold any migration CLI under `tools/`).
 
 ### Phase 3: Data, Storage & Secrets (`add-data`)
@@ -138,8 +139,16 @@ Say what was created: app name, directory, workloads, data store, bucket, queue,
    rm -rf "$tmpdir"
    ```
    If `origin` already exists, use `git remote set-url origin`. If a branch already exists on the remote, do not force-push. If they say no, stop. The app stays local. Read `.sdlc/state.yaml` on a later turn so you do not re-ask the scaffold facts.
-3. **Explain the two bind scripts. Do not run them unless they ask.**
-   `scripts/bind-staging.sh` needs IAM on `opptra-staging` only. `scripts/bind-production.sh` is for someone who can change IAM in `prod_project`. Neither script deploys, and neither protects branches. A direct push to `staging` deploys staging. A pull request from `main` into `production` is the only deploy that comes from `main`. Do not merge `main` into `staging`. The steps are in `docs/bind.md` of `opptra/sdlc-resources`.
+3. **Explain the two bind scripts and print a ready-to-send Platform Admin handoff block. Do not run them unless they ask.**
+   `scripts/bind-staging.sh` needs IAM on `opptra-staging` only. `scripts/bind-production.sh` is for someone who can change IAM in `prod_project`. Neither script deploys, and neither protects branches. Print this copy-paste handoff block for the developer when production IAM is owned by another person:
+   ```text
+   Handoff for Platform / Production Project Admin:
+   Please bind GitHub Actions WIF for opptra/<name> in <prod_project>:
+     git clone https://github.com/opptra/<name>.git && cd <name>
+     ./scripts/bind-production.sh opptra/<name> <prod_project>
+   (Then run the two `gh variable set` commands it prints.)
+   ```
+   A direct push to `staging` deploys staging. A pull request from `main` into `production` is the only deploy that comes from `main`. Do not merge `main` into `staging`. The steps are in `docs/bind.md` of `opptra/sdlc-resources`.
 4. **Build the first feature slice locally with `/feature`.**
    The scaffold is the platform shell. Port or build product behaviour one `/feature` pull request at a time.
 5. **Try staging only after bind-staging has succeeded and they ask.** Push the branch directly to `staging` and read the Terraform plan. Confirm the jobs, schedules, and webhook match `service.yaml`. A disabled job must have no Scheduler entry. Merging to `main` does not update staging. Then print the ship card from `../session/SKILL.md`.

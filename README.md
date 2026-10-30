@@ -9,16 +9,16 @@ The skills every Opptra developer uses to create an app, change an app's capabil
 | `change-app` | Adding or updating a workload, scheduled job, cron schedule, database (`postgres`, `firestore`, `bigquery`), bucket, queue, or secret on an existing app. Updates `service.yaml`, runs `add-data` → `add-tests` → `sync-infra`, and opens an `infra/<ticket>-<slug>` pull request. |
 | `adopt-terraform` | Moving an existing app from `deploy.sh`, Cloud Build, Vercel, or manual GCP resources onto Terraform. Runs `sdlc.py discover-infra`, presents a Terraform Adoption Scorecard, and generates `service.yaml`, `infra/`, and declarative `imports.tf.example` blocks. |
 | `align-app` | An existing repository. Prints the scorecard, then offers three paths: ship today, make the agent safe, or move the host. One yes. |
-| `feature` | A Linear feature. If a cloud resource is missing, opens the infra pull request in the same chat first. Otherwise branches `feat/<ticket>-<slug>`, writes an OpenSpec unless the depth is `express`, opens one pull request into `main`, and prints the ship card. |
-| `bug` | A Linear bug. Writes a failing test first, opens one pull request into `main`, and prints the ship card including the rollback line. |
+| `feature` | A Linear feature. Syncs plain `env:` changes inline; when a stateful cloud resource is missing, opens the `infra/` PR first and immediately stacks `feat/<ticket>-<slug>` on top so product code continues without waiting. Uses a 2-gate confirmation flow and prints the ship card. |
+| `bug` | A Linear bug. Investigates root cause and writes a failing reproduction test before Gate 1, applies the minimal fix, verifies `.githooks/pre-commit` and `make ci`, opens one PR into `main`, and prints the ship card including the rollback line. |
 | `add-skill` | A new team skill. Writes `opptra/skills/<name>/SKILL.md` and opens a pull request into `main`. |
 | `modify-skill` | A change to an existing team skill. Edits that skill from the developer's instructions and opens a pull request into `main`. |
-| `linear-continuity` | Shared reference read by the skills above before they create or update a Linear issue. Do not run it on its own. |
-| `session` | Shared pins, resume file, and feature depth. Do not run it on its own. |
-| `fetch-skill` | Fetches `main` of this repository and links every skill into Cursor, Claude Code, and Codex. |
-| `doctor` | Checks this machine: skills commit, `gh`, Linear, Python, Node, and the pinned OpenSpec. Does not scaffold an app. `sdlc.py doctor` is a different command. |
+| `linear-continuity` | Shared reference read by the skills above before they create or update a Linear issue (supports `LOCAL-DRAFT` fallback while working locally offline). Do not run it on its own. |
+| `session` | Shared pins, local generator cache (`~/.cache/opptra/sdlc-resources.git`), resume file, and feature depth. Do not run it on its own. |
+| `fetch-skill` | Fetches `main` of this repository, refreshes the local generator cache, and links every skill into Cursor, Claude Code, Codex, and OpenCode via `./install.sh`. |
+| `doctor` | Checks this machine: skills commit, local generator cache, `gh`, Linear, Python, `uv`, Node, `terraform`, and the pinned OpenSpec. Auto-fixes skill links and OpenSpec version when asked. |
 
-`opptra/sdlc-resources` stays the library: the mapping, the skeletons, the phase CLI (`scripts/sdlc.py`), the Terraform modules, and the workflows. People do not keep that repo checked out.
+`opptra/sdlc-resources` stays the library: the mapping, the skeletons, the phase CLI (`scripts/sdlc.py`), the Terraform modules, and the workflows. `./install.sh` maintains a local bare cache at `~/.cache/opptra/sdlc-resources.git` so generator runs are instant and work offline.
 
 `main` does not deploy. A push to `staging` deploys staging. A merge into `production` deploys production.
 
@@ -26,17 +26,11 @@ The skills every Opptra developer uses to create an app, change an app's capabil
 
 Add this repository as a team marketplace and set the `opptra` plugin to Required. Cursor installs the skills for everyone on the team.
 
-## First install for Claude Code, Codex, and a local Cursor copy
+## First install for Claude Code, Codex, OpenCode, and a local Cursor copy
 
 ```bash
 git clone https://github.com/opptra/agent-skills.git ~/agent-skills
-mkdir -p ~/.claude/skills ~/.codex/skills ~/.cursor/skills
-for dir in ~/agent-skills/opptra/skills/*/; do
-  name=$(basename "$dir")
-  ln -sfn "$dir" ~/.claude/skills/"$name"
-  ln -sfn "$dir" ~/.codex/skills/"$name"
-  ln -sfn "$dir" ~/.cursor/skills/"$name"
-done
+~/agent-skills/install.sh
 ```
 
-After that, ask the agent to fetch Opptra skills. The `fetch-skill` skill pulls `main` and refreshes those links, including skills added since the clone.
+After that, ask the agent to fetch Opptra skills. The `fetch-skill` skill pulls `main`, refreshes the local generator cache, and re-runs `./install.sh`.
