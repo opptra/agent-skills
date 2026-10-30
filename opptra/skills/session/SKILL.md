@@ -17,22 +17,31 @@ When you print a route banner, add two lines:
 
 Run this before `sdlc.py`. It leaves the generator in `$tmpdir/sdlc`.
 
-Use the recorded commit when `.sdlc/state.yaml` in the app has `generator_sha`. Clone `main` only when that field is missing, or when the developer asks to upgrade the generator. Set `UPGRADE_GENERATOR=1` only for that upgrade. The next phase records the new `generator_sha`.
+Uses a local bare cache at `~/.cache/opptra/sdlc-resources.git` (or `OPPTRA_SDLC_PATH` when set for local generator development) so generator checkouts take `<100ms` and work offline. It fetches from GitHub only when the cache is missing, the recorded `generator_sha` is not in the cache, or `UPGRADE_GENERATOR=1`.
 
 ```bash
 tmpdir=$(mktemp -d)
 repo="$tmpdir/sdlc"
+cache="${HOME}/.cache/opptra/sdlc-resources.git"
 sha=""
 if [ -f .sdlc/state.yaml ]; then
   sha=$(python3 -c "import pathlib,re; t=pathlib.Path('.sdlc/state.yaml').read_text(); m=re.search(r'(?m)^generator_sha:\s*(\S+)', t); print(m.group(1) if m else '')")
 fi
-if [ -n "$sha" ] && [ "${UPGRADE_GENERATOR:-}" != "1" ]; then
-  git init "$repo"
-  git -C "$repo" remote add origin https://github.com/opptra/sdlc-resources.git
-  git -C "$repo" fetch --depth 1 origin "$sha"
-  git -C "$repo" checkout --detach FETCH_HEAD
+if [ -n "${OPPTRA_SDLC_PATH:-}" ] && [ -d "${OPPTRA_SDLC_PATH}" ]; then
+  cp -R "${OPPTRA_SDLC_PATH}" "$repo"
 else
-  git clone --depth 1 --branch main https://github.com/opptra/sdlc-resources.git "$repo"
+  mkdir -p "$(dirname "$cache")"
+  if [ ! -d "$cache" ]; then
+    git clone --bare https://github.com/opptra/sdlc-resources.git "$cache"
+  elif [ -z "$sha" ] || [ "${UPGRADE_GENERATOR:-}" = "1" ] || ! git -C "$cache" cat-file -e "${sha}^{commit}" 2>/dev/null; then
+    git -C "$cache" fetch --prune origin "+refs/heads/*:refs/heads/*" || true
+  fi
+  git clone --shared "$cache" "$repo"
+  if [ -n "$sha" ] && [ "${UPGRADE_GENERATOR:-}" != "1" ] && git -C "$repo" cat-file -e "${sha}^{commit}" 2>/dev/null; then
+    git -C "$repo" checkout --detach "$sha"
+  else
+    git -C "$repo" checkout --detach refs/heads/main 2>/dev/null || git -C "$repo" checkout --detach HEAD
+  fi
 fi
 ```
 
@@ -59,7 +68,8 @@ After a feature or bug pull request into `main` is open, print this and stop. Su
 ```text
 Ship card
 main does not deploy.
-Try staging: git push origin <branch>:staging
+Check active staging runs: gh run list --branch staging --limit 1
+Try staging: git push --force-with-lease origin <branch>:staging
 Do not merge main into staging.
 When staging looks right, open a pull request from main into production. That merge deploys production.
 ```
@@ -83,16 +93,17 @@ route: feature
 depth: standard
 ticket: ABC-123
 branch: feat/ABC-123-slug
+infra_branch: infra/ABC-123-slug
 plan_approved: true
 next_step: openspec
 summary: One sentence of the agreed plan.
 ```
 
-`route` is `feature` or `bug`. `depth` is `express`, `standard`, or `migration` for a feature. A bug omits `depth`. `next_step` is `plan`, `openspec`, `test`, `code`, `ci`, `pr`, or `wait-for-infra`.
+`route` is `feature` or `bug`. `depth` is `express`, `standard`, or `migration` for a feature. A bug omits `depth`. `next_step` is `plan`, `openspec`, `test`, `code`, `ci`, `pr`, `code-stacked-on-infra`, or `wait-for-infra`.
 
 If `plan_approved` is true and `branch` is the current branch, continue at `next_step`. Do not ask for the plan again. If `route` does not match the skill you are running, stop and say so.
 
-When `next_step` is `wait-for-infra`, do not write product code. Continue the feature or bug after the developer says the infra pull request has merged.
+When `next_step` is `code-stacked-on-infra`, the `infra/<ticket-id>-<slug>` pull request is already open against `main` and the current `feat/` or `fix/` branch is stacked on top of `infra/<ticket-id>-<slug>`. Continue writing and testing product code locally right away; rebase onto `main` once the infra pull request merges. When `next_step` is `wait-for-infra` (used only when the developer explicitly asked to wait), pause until the infra pull request has merged.
 
 When the developer approves the plan, write this file before product code. Update `next_step` as each stage finishes.
 

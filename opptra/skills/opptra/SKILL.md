@@ -24,6 +24,6 @@ Route: <skill> | Why: <one sentence>
 | Add a team skill | `add-skill` |
 | Change a team skill | `modify-skill` |
 
-A capability change and a product change are two pull requests. Stay in this chat. Follow `change-app`, open the infra pull request, and continue the feature or bug after the developer says that pull request has merged. Do not end the chat between them.
+A capability change and a product change are two pull requests. Stay in this chat. Follow `change-app`, open the `infra/<ticket>-<slug>` pull request, and immediately stack `feat/<ticket>-<slug>` (or `fix/<ticket>-<slug>`) on top of that infra branch (`next_step: code-stacked-on-infra`) so product coding and local testing continue without waiting for the infra merge. Do not end the chat between them.
 
 If two routes fit and you cannot tell which, ask once.

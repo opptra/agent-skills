@@ -22,17 +22,10 @@ Stop if the checkout has uncommitted changes or is not on `main`. Tell the devel
 
 ```bash
 git pull --ff-only origin main
-mkdir -p ~/.claude/skills ~/.codex/skills ~/.cursor/skills
-for dir in opptra/skills/*/; do
-  [ -f "${dir}SKILL.md" ] || continue
-  name=$(basename "$dir")
-  ln -sfn "$PWD/$dir" ~/.claude/skills/"$name"
-  ln -sfn "$PWD/$dir" ~/.codex/skills/"$name"
-  ln -sfn "$PWD/$dir" ~/.cursor/skills/"$name"
-done
+./install.sh
 ```
 
-Run that from the checkout. Do not put anything in `~/.cursor/skills-cursor`.
+Run that from the checkout. `./install.sh` links every skill into `~/.claude/skills`, `~/.codex/skills`, `~/.cursor/skills`, and `~/.config/opencode/skills`, refreshes the local bare cache at `~/.cache/opptra/sdlc-resources.git`, and verifies the pinned `@fission-ai/openspec` version. Do not put anything in `~/.cursor/skills-cursor`.
 
 Remove a symlink in those three directories only when it points at `opptra/skills/<name>` inside this checkout and that folder no longer contains `SKILL.md`. Leave every other skill alone.
 
