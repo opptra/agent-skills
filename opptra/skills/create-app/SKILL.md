@@ -102,8 +102,11 @@ python3 "$tmpdir/sdlc/scripts/sdlc.py" check "<target-dir>/service.yaml"
    ```
 3. **Run and verify the generated `.githooks/` and `make ci`:**
    - Execute `.githooks/pre-commit` and `make ci` inside `<target-dir>`.
+   - `make ci` builds the deploy image with the same `docker build` the shared workflow runs. It also runs `terraform validate` with `-backend=false` when Terraform is installed. That validate does not read state and does not apply.
+   - If the image build fails, or `odlc status --json` lists `image_notes`, fix `path`, `docker_context`, or `dockerfile` in `service.yaml` and run `sync-infra` again. Do not edit `infra/` or `.github/workflows/` to retarget the build.
    - If any lint, formatting, or test issue is auto-resolvable, fix it immediately and re-run until `.githooks/pre-commit` and `make ci` exit `0`.
    - If a check fails due to something that cannot be resolved without user input, explain the exact failure and ask the developer whether to provide the input now or disable that specific check (`run_tests: false` or `run_lint: false`) in `service.yaml` (recording the reason under `unmet`).
+   - Do not ask to create the GitHub repository until this `make ci` exits 0.
 4. Push the agreed requirements and blueprint summary to the Linear issue.
 5. Never hand-edit `infra/` or `.github/workflows/`.
 
@@ -124,8 +127,8 @@ Say what was created: app name, directory, workloads, data store, bucket, queue,
 
 ### Next steps, in this order
 
-1. **Run and verify locally first (`make setup && make dev && make test`).**
-   The scaffold generated `.devcontainer/devcontainer.json`, `.env.example`, `Makefile`, and `backend/app/config.py` (which reads `.env` when `APP_ENV=local` and Secret Manager in the cloud). Copy `.env.example` to `.env`, fill in any local test values, and run `make setup`, `make dev`, and `make test` on your machine before any GitHub step. Stop here until those commands pass.
+1. **Run and verify locally first (`make setup && make dev && make test && make ci`).**
+   The scaffold generated `.devcontainer/devcontainer.json`, `.env.example`, `Makefile`, and `backend/app/config.py` (which reads `.env` when `APP_ENV=local` and Secret Manager in the cloud). Copy `.env.example` to `.env`, fill in any local test values, and run `make setup`, `make dev`, `make test`, and `make ci` on your machine before any GitHub step. `make ci` builds the image Cloud Run will run. Stop here until those commands pass. A failed image build is fixed in `service.yaml`, then `sync-infra` runs again.
 2. **Create the private GitHub repository only after they say yes.**
    Ask once: create private `opptra/<name>`? On yes, from the app directory:
    ```bash

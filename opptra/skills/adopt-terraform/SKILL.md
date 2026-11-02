@@ -47,7 +47,7 @@ Ask the developer to confirm which resources already exist in `prod_project` (to
 ## 3. Generate `service.yaml`, `infra/`, Workflows & Declarative Imports
 
 1. Branch from `main` as `infra/<ticket-id>-adopt-terraform`.
-2. Write or update `service.yaml` with all discovered components, per-component `region`, `path` / `frontend_path`, `jobs` (commands, crons, memory, timeouts), `secrets`, `database`, `bucket`, `queue`, and `alerts`.
+2. Write or update `service.yaml` with all discovered components, per-component `region`, `path` / `frontend_path`, `jobs` (commands, crons, memory, timeouts), `secrets`, `database`, `bucket`, `queue`, and `alerts`. Keep `docker_context` and `dockerfile` from the proposal when the Dockerfile is not `<path>/Dockerfile`. Keep a job `command` that came from `--command` or from that Dockerfile's `CMD`.
 3. Validate `service.yaml`, generate `infra/` and the workflows (`plan.yml`, `deploy-staging.yml`, `deploy-production.yml`), and generate the declarative Terraform 1.9+ import blocks:
    ```bash
    python3 "$tmpdir/sdlc/scripts/sdlc.py" check service.yaml
@@ -56,6 +56,7 @@ Ask the developer to confirm which resources already exist in `prod_project` (to
    python3 "$tmpdir/sdlc/scripts/sdlc.py" status . --table
    rm -rf "$tmpdir"
    ```
+   Run `.githooks/pre-commit` and `make ci`. `make ci` builds the image the new deploy workflow will build. If that build fails, or `status --json` lists `image_notes`, fix `service.yaml` and run `sync-infra` again. Do not edit the generated workflow.
 4. For resources the developer confirmed already exist in `prod_project`, copy the matching `import {}` blocks from `infra/imports.tf.example` into `infra/imports.tf` (removing any block for a resource that does not exist yet).
 
 ## 4. Summary and Safe Cutover Steps
