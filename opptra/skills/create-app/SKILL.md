@@ -36,7 +36,13 @@ Script-Owned Paths: infra/, .github/workflows/, managed rule blocks in AGENTS.md
 - **Per-component region**: Set `region` on a component when it runs in a different GCP region from the app default.
 - **Resource prefix (`prefix`)**: Every external resource created in GCP (Cloud Run services/jobs, Scheduler entries, Cloud Tasks queues, Secret Manager secrets, buckets, Cloud SQL instances, service accounts, and alert policies) is prefixed with `prefix` (defaults to `name` in `service.yaml`, e.g. `prefix: cx` → `cx-report-daily`, `cx-smtp`).
 - **Data, storage, queues, secrets, IAM, custom Terraform, alerts**:
-  - `database: postgres` (creates Cloud SQL + migration job by default; set `postgres_instance: <proj>:<region>:<instance>` + `postgres_secret: <id>` to connect to a pre-existing Cloud SQL instance, or `postgres_external: true` for an external Postgres via `DATABASE_URL`), `firestore` (`(default)` DB), `bigquery` (`modules/bigquery` + optional `bigquery_project` and `bigquery_datasets: [...]`, including cross-project `project.dataset`), or `none`
+  - `database: postgres | firestore | bigquery | none`:
+    - **When `database: postgres` is chosen, decide between the 3 Postgres modes:**
+      1. **Default (`database: postgres` only — do NOT add `postgres_external` or `postgres_instance`):** The new app needs its own dedicated GCP Cloud SQL Postgres 16 instance created and managed by Terraform (`modules/cloud-sql`).
+      2. **Existing Cloud SQL (`postgres_instance: <proj>:<region>:<instance>` + `postgres_secret: <id>` — do NOT add `postgres_external`):** The user or plan specifies an existing GCP Cloud SQL connection name to share/connect to via Cloud SQL Unix socket.
+      3. **External / TCP Postgres (`postgres_external: true` + `DATABASE_URL` in `secrets`):** The user or plan says the database is hosted outside GCP Cloud SQL (e.g., Neon, Supabase, RDS) or connected via a direct TCP `DATABASE_URL` without a Cloud SQL Unix socket.
+    - `firestore`: project `(default)` Native DB.
+    - `bigquery`: `modules/bigquery` + optional `bigquery_project` and `bigquery_datasets: [...]` (including cross-project `project.dataset`).
   - `bucket: private` (creates `<project>-<name>-assets` by default; set `existing_bucket: <bucket-name>` to bind IAM to a pre-existing bucket without creating one)
   - `queue: <name>` for Cloud Tasks webhook/event buffering
   - `secrets: [<id>, ...]` for app-owned Secret Manager shells, `existing_secrets: [<ENV>, ...]` for pre-existing/shared secrets (mounts & grants IAM without creating the shell in `module.secrets`), and `secret_map: {<ENV>: <gcp-secret-id>}` for brownfield secret IDs
