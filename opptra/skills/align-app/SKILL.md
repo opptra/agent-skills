@@ -37,7 +37,7 @@ Inspect the repository layout (`Dockerfile`, `deploy/`, `cloudbuild.yaml`, `.env
 - Use per-component `region` when components run in different GCP regions (for example, a dashboard in `asia-southeast1` and jobs in `asia-south1`).
 - Use per-component `path` and `frontend_path` when code lives in existing folders (such as `path: .` and `frontend_path: apps/web`) instead of `components/<name>`, so `.github/workflows/ci.yml` runs against directories that actually exist.
 - When existing GCP resources in `prod_project` have legacy unprefixed names, set `legacy_service_name: <existing-service-name>` and `secret_map: { ENV_VAR: existing-secret-id }` on the component so live production secrets and services do not need to be renamed to pass the 17-point scorecard.
-- Use `database: postgres | firestore | bigquery | none`, `bucket: private | none`, `queue`, `secrets`, `env`, `alerts`, and `unmet` for any platform gap.
+- Use `database: postgres | firestore | bigquery | none` (with `bigquery_datasets: [...]` when datasets are known), `bucket: private | none`, `queue`, `secrets`, `env`, `extra_roles: ["roles/..."]`, `custom_terraform: true` (writing custom GCP resources into `infra/custom.keep.tf` instead of leaving them unbuilt), `alerts`, and `unmet` only for non-repo prerequisites.
 
 Always present both tables from `sdlc.py status --table`. That output is the 17-point scorecard and the 10 rule pillars. Every row has a last column, **What this means for you**. Keep that column. If the default sentence does not match this repo, rewrite it in plain language: what the row is checking, and what the developer will do differently once that row is in place. When you fill a row by hand, use the columns in `reference.md`.
 

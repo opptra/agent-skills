@@ -9,7 +9,7 @@ You fill in facts, run the deterministic phase scripts in `opptra/sdlc-resources
 
 Create the GitHub repository only after `make dev` passes and the developer says yes. It is a private repository in `opptra`. Then push `main`, `staging`, and `production`, and create the GitHub environments `staging` and `production`. Do not run `scripts/bind-staging.sh` or `scripts/bind-production.sh` unless they say they have permission and ask you to. Staging bind does not need production IAM. Production bind is a file they send to someone who can change IAM in `prod_project`. Do not run `protect-branches.sh`. Branch protection is an organization ruleset. Do not leave a checkout of `opptra/sdlc-resources` on the machine.
 
-Apps Script is not a choice. If the whole request is only Apps Script, say so and stop. When part of a request needs something the platform does not generate yet (such as project-level billing budgets), scaffold every part the platform does support and record the gap under `unmet` in `service.yaml` with a clear recommendation.
+Apps Script is not a choice. If the whole request is only Apps Script, say so and stop. When a request needs a GCP resource outside the built-in modules (such as Pub/Sub, Redis, or Cloud Armor), do not leave it unbuilt in `unmet`: use `extra_roles: ["roles/..."]` for IAM grants, `bigquery_datasets: [...]` for BigQuery datasets, or set `custom_terraform: true` and write the Terraform resource in `infra/custom.keep.tf` (which `sync-infra` preserves across runs). Reserve `unmet` in `service.yaml` only for non-repo/organization prerequisites (such as project-level billing budgets).
 
 ## 1. Route Banner, Resume Check & Understand
 
@@ -35,11 +35,13 @@ Script-Owned Paths: infra/, .github/workflows/, managed rule blocks in AGENTS.md
 - **A page people open or an HTTP API**: archetype `cloud-run-service`, parts `[api]` (and `ui` when there is a page), auth `iap` (staff), `app-login`, `shared-secret` (webhook), or `public`.
 - **Per-component region**: Set `region` on a component when it runs in a different GCP region from the app default.
 - **Resource prefix (`prefix`)**: Every external resource created in GCP (Cloud Run services/jobs, Scheduler entries, Cloud Tasks queues, Secret Manager secrets, buckets, Cloud SQL instances, service accounts, and alert policies) is prefixed with `prefix` (defaults to `name` in `service.yaml`, e.g. `prefix: cx` → `cx-report-daily`, `cx-smtp`).
-- **Data, storage, queues, secrets, alerts**:
-  - `database: postgres` (Cloud SQL), `firestore` (`(default)` DB), `bigquery` (analytical warehouse), or `none`
+- **Data, storage, queues, secrets, IAM, custom Terraform, alerts**:
+  - `database: postgres` (Cloud SQL + automated migration job), `firestore` (`(default)` DB), `bigquery` (`modules/bigquery` + optional `bigquery_datasets: [...]`), or `none`
   - `bucket: private` for reports, manuals, exports, or uploads
   - `queue: <name>` for Cloud Tasks webhook/event buffering
-  - `secrets: [<id>, ...]` for Secret Manager shells (IDs only, never values)
+  - `secrets: [<id>, ...]` for Secret Manager shells (IDs only, never values) and `secret_map: {<ENV>: <gcp-secret-id>}` for brownfield secrets
+  - `extra_roles: ["roles/..."]` for additional GCP IAM roles granted to the component's runtime service account
+  - `custom_terraform: true` to scaffold and preserve `infra/custom.keep.tf` for custom GCP resources (referencing `var.project_id`, `var.region`, `var.name`, and `module.service.runtime_service_account`)
   - `alerts: true` for failed job / error log alert policies
 
 ## 2. Confirm the short blueprint and wait

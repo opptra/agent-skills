@@ -5,7 +5,12 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CACHE_DIR="${HOME}/.cache/opptra/sdlc-resources.git"
 
-mkdir -p "${HOME}/.claude/skills" "${HOME}/.codex/skills" "${HOME}/.cursor/skills" "${HOME}/.config/opencode/skills"
+mkdir -p "${HOME}/.claude/skills" "${HOME}/.codex/skills" "${HOME}/.cursor/skills" "${HOME}/.config/opencode/skills" "${HOME}/.local/bin"
+
+if [ -f "${ROOT}/bin/opptra" ]; then
+  chmod +x "${ROOT}/bin/opptra"
+  ln -sfn "${ROOT}/bin/opptra" "${HOME}/.local/bin/opptra"
+fi
 
 linked=()
 for dir in "${ROOT}"/opptra/skills/*/; do

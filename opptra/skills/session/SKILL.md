@@ -13,11 +13,19 @@ When you print a route banner, add two lines:
 - `Skills:` the short commit of the checkout that contains this skill. From that repository run `git rev-parse --short HEAD`. If that fails, print `Skills: unknown`.
 - `Generator:` the short commit of the `opptra/sdlc-resources` clone for this run (`git -C "$tmpdir/sdlc" rev-parse --short HEAD`). Before that clone exists, print `Generator: pending`. After a phase, `.sdlc/state.yaml` field `generator_sha` is the full commit. Print its first 12 characters.
 
-## Generator checkout
+## Generator CLI (`opptra`) & Checkout
 
-Run this before `sdlc.py`. It leaves the generator in `$tmpdir/sdlc`.
+When `~/.local/bin/opptra` is installed (via `~/agent-skills/install.sh`), you can run subcommands directly without creating `$tmpdir` manually:
+- `opptra next [dir] [--json]`
+- `opptra doctor [--fix]`
+- `opptra check [service.yaml]`
+- `opptra status [dir] [--table|--json|--check]`
+- `opptra discover [dir] [--table|--json|--propose-manifest|--write-imports <service.yaml>]`
+- `opptra sync [service.yaml] [dest] [--ci-only] [--upgrade]`
+- `opptra secrets [dir] [--env staging|prod] [--json]`
+- `opptra <phase> <service.yaml> [dest]` (`init-runtime`, `add-data`, `add-tests`, `sync-infra`, `set-github-repo`)
 
-Uses a local bare cache at `~/.cache/opptra/sdlc-resources.git` (or `OPPTRA_SDLC_PATH` when set for local generator development) so generator checkouts take `<100ms` and work offline. It fetches from GitHub only when the cache is missing, the recorded `generator_sha` is not in the cache, or `UPGRADE_GENERATOR=1`.
+When running `sdlc.py` directly via `$tmpdir/sdlc`, use the local bare cache at `~/.cache/opptra/sdlc-resources.git` (or `OPPTRA_SDLC_PATH` when set for local generator development) so generator checkouts take `<100ms` and work offline. It fetches from GitHub only when the cache is missing, the recorded `generator_sha` is not in the cache, or `UPGRADE_GENERATOR=1`.
 
 ```bash
 tmpdir=$(mktemp -d)

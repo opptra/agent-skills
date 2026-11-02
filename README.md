@@ -33,4 +33,6 @@ git clone https://github.com/opptra/agent-skills.git ~/agent-skills
 ~/agent-skills/install.sh
 ```
 
+`install.sh` also links the **`opptra` CLI** into `~/.local/bin/opptra` (`opptra next`, `opptra doctor [--fix]`, `opptra status`, `opptra check`, `opptra discover`, `opptra sync`, `opptra secrets`).
+
 After that, ask the agent to fetch Opptra skills. The `fetch-skill` skill pulls `main`, refreshes the local generator cache, and re-runs `./install.sh`.

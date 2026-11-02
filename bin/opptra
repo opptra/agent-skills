@@ -1,0 +1,179 @@
+#!/usr/bin/env bash
+# Unified Opptra SDLC CLI for both developers and AI agents.
+# Wraps the cached `opptra/sdlc-resources` engine (`scripts/sdlc.py`) and machine checks.
+set -euo pipefail
+
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+  DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ "$SOURCE" != /* ]] && SOURCE="${DIR}/${SOURCE}"
+done
+SKILLS_ROOT="$(cd -P "$(dirname "$SOURCE")/.." && pwd)"
+CACHE_DIR="${HOME}/.cache/opptra/sdlc-resources.git"
+
+usage() {
+  cat <<'EOF'
+Usage: opptra <command> [args...]
+
+Commands:
+  next [dir] [--json]                        Show current SDLC state, pending items, and next command
+  doctor [--fix]                             Check machine readiness (skills, cache, gh, uv, Node, OpenSpec)
+  status [dir] [--table|--json|--check]      Inspect repo & render the 17-point SDLC scorecard
+  check [service.yaml]                       Validate service.yaml against schema and rules
+  discover [dir] [--table|--json|--propose-manifest|--write-imports <service.yaml>]
+                                             Scan brownfield repo for GCP resources, secrets, and imports
+  sync [service.yaml] [dest] [--ci-only] [--upgrade]
+                                             Regenerate infra/, workflows, rules, and runtime SDK
+  secrets [dir] [--env staging|prod] [--json]
+                                             List resolved GCP Secret Manager IDs for service.yaml
+  init-runtime <service.yaml> [dest] [--overwrite]
+  add-data <service.yaml> [dest]
+  add-tests <service.yaml> [dest]
+  sync-infra <service.yaml> [dest] [--ci-only]
+  all <service.yaml> [dest]
+  set-github-repo <org/repo> [dest]
+EOF
+}
+
+run_doctor() {
+  local fix=0
+  if [[ "${1:-}" == "--fix" ]]; then
+    fix=1
+  fi
+  if [[ "$fix" -eq 1 ]]; then
+    "${SKILLS_ROOT}/install.sh"
+  fi
+  local skills_sha
+  skills_sha="$(git -C "$SKILLS_ROOT" rev-parse --short HEAD 2>/dev/null || echo "")"
+  if [[ -n "$skills_sha" ]]; then
+    echo "1. Skills commit:    ok ($skills_sha)"
+  else
+    echo "1. Skills commit:    fix (run opptra doctor --fix)"
+  fi
+  if [[ -d "$CACHE_DIR" ]] || [[ -d "${SKILLS_ROOT}/../sdlc-resources" ]]; then
+    echo "2. Generator cache:  ok"
+  else
+    echo "2. Generator cache:  fix (run opptra doctor --fix)"
+  fi
+  if gh auth status >/dev/null 2>&1; then
+    echo "3. GitHub auth:      ok"
+  else
+    echo "3. GitHub auth:      fix (run: gh auth login)"
+  fi
+  if [[ "$(gh api orgs/opptra --jq .login 2>/dev/null || echo "")" == "opptra" ]]; then
+    echo "4. Org opptra:       ok"
+  else
+    echo "4. Org opptra:       fix (verify opptra org membership with gh)"
+  fi
+  if command -v python3 >/dev/null 2>&1; then
+    echo "5. Python:           ok ($(python3 --version 2>&1))"
+  else
+    echo "5. Python:           fix (install Python 3.12+)"
+  fi
+  if command -v uv >/dev/null 2>&1; then
+    echo "6. uv:               ok ($(uv --version 2>&1))"
+  else
+    echo "6. uv:               fix (curl -LsSf https://astral.sh/uv/install.sh | sh)"
+  fi
+  if command -v node >/dev/null 2>&1; then
+    echo "7. Node:             ok ($(node --version 2>&1))"
+  else
+    echo "7. Node:             fix (install Node 22+)"
+  fi
+  if command -v terraform >/dev/null 2>&1; then
+    echo "8. Terraform:        ok ($(terraform --version | head -n1))"
+  else
+    echo "8. Terraform:        warn (optional locally; install terraform >= 1.9)"
+  fi
+  local expected_os=""
+  if [[ -f "${SKILLS_ROOT}/opptra/pins.env" ]]; then
+    # shellcheck disable=SC1091
+    source "${SKILLS_ROOT}/opptra/pins.env"
+    expected_os="${OPENSPEC_VERSION:-}"
+  fi
+  local actual_os
+  actual_os="$(openspec --version 2>/dev/null || echo "")"
+  if [[ -n "$expected_os" && "$actual_os" == "$expected_os" ]]; then
+    echo "9. OpenSpec pin:     ok (${actual_os})"
+  else
+    echo "9. OpenSpec pin:     fix (expected ${expected_os:-unknown}, got ${actual_os:-missing}; run: opptra doctor --fix)"
+  fi
+}
+
+cmd="${1:-}"
+if [[ -z "$cmd" || "$cmd" == "-h" || "$cmd" == "--help" || "$cmd" == "help" ]]; then
+  usage
+  exit 0
+fi
+shift
+
+if [[ "$cmd" == "doctor" ]]; then
+  run_doctor "$@"
+  exit 0
+fi
+
+# Checkout generator into ephemeral tmpdir from local cache or sibling/OPPTRA_SDLC_PATH
+tmpdir="$(mktemp -d)"
+trap 'rm -rf "$tmpdir"' EXIT
+repo="${tmpdir}/sdlc"
+
+sha=""
+if [[ -f .sdlc/state.yaml ]]; then
+  sha="$(python3 -c "import pathlib,re; t=pathlib.Path('.sdlc/state.yaml').read_text(); m=re.search(r'(?m)^generator_sha:\s*(\S+)', t); print(m.group(1) if m else '')" 2>/dev/null || echo "")"
+fi
+
+upgrade="${UPGRADE_GENERATOR:-0}"
+filtered_args=()
+for arg in "$@"; do
+  if [[ "$arg" == "--upgrade" ]]; then
+    upgrade=1
+  else
+    filtered_args+=("$arg")
+  fi
+done
+
+if [[ -n "${OPPTRA_SDLC_PATH:-}" && -d "${OPPTRA_SDLC_PATH}" ]]; then
+  cp -R "${OPPTRA_SDLC_PATH}" "$repo"
+elif [[ -d "${SKILLS_ROOT}/../sdlc-resources/scripts" && ( -z "$sha" || "$upgrade" == "1" ) ]]; then
+  cp -R "${SKILLS_ROOT}/../sdlc-resources" "$repo"
+else
+  mkdir -p "$(dirname "$CACHE_DIR")"
+  if [[ ! -d "$CACHE_DIR" ]]; then
+    if [[ -d "${SKILLS_ROOT}/../sdlc-resources/.git" ]]; then
+      git clone --bare "${SKILLS_ROOT}/../sdlc-resources" "$CACHE_DIR" >/dev/null 2>&1
+    else
+      git clone --bare https://github.com/opptra/sdlc-resources.git "$CACHE_DIR" >/dev/null 2>&1
+    fi
+  elif [[ -z "$sha" || "$upgrade" == "1" ]] || ! git -C "$CACHE_DIR" cat-file -e "${sha}^{commit}" 2>/dev/null; then
+    git -C "$CACHE_DIR" fetch --prune origin "+refs/heads/*:refs/heads/*" >/dev/null 2>&1 || true
+  fi
+  git clone --shared "$CACHE_DIR" "$repo" >/dev/null 2>&1
+  if [[ -n "$sha" && "$upgrade" != "1" ]] && git -C "$repo" cat-file -e "${sha}^{commit}" 2>/dev/null; then
+    git -C "$repo" checkout --detach "$sha" >/dev/null 2>&1
+  else
+    git -C "$repo" checkout --detach refs/heads/main >/dev/null 2>&1 || git -C "$repo" checkout --detach HEAD >/dev/null 2>&1
+  fi
+fi
+
+case "$cmd" in
+  check)
+    target="${filtered_args[0]:-service.yaml}"
+    python3 "${repo}/scripts/sdlc.py" check "$target"
+    ;;
+  discover)
+    python3 "${repo}/scripts/sdlc.py" discover-infra "${filtered_args[@]+"${filtered_args[@]}"}"
+    ;;
+  sync)
+    if [[ ${#filtered_args[@]} -eq 0 ]]; then
+      python3 "${repo}/scripts/sdlc.py" sync-infra service.yaml .
+    elif [[ "${filtered_args[0]}" == --* ]]; then
+      python3 "${repo}/scripts/sdlc.py" sync-infra service.yaml . "${filtered_args[@]}"
+    else
+      python3 "${repo}/scripts/sdlc.py" sync-infra "${filtered_args[@]}"
+    fi
+    ;;
+  *)
+    python3 "${repo}/scripts/sdlc.py" "$cmd" "${filtered_args[@]+"${filtered_args[@]}"}"
+    ;;
+esac
