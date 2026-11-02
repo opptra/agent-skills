@@ -25,7 +25,7 @@ Script-Owned Paths: infra/, .github/workflows/, managed rule blocks in AGENTS.md
 ## 2. Apply in Phases
 
 1. Branch from `main` as `infra/<ticket-id>-<short-slug>`.
-2. Update `service.yaml` (and `config/jobs.yaml` if changing job schedules or `enabled` flags). Ensure any new external GCP resource (job, service, queue, secret ID) follows the `<prefix>-<resource>` naming standard. For additional IAM roles use `extra_roles: ["roles/..."]`; for BigQuery datasets use `bigquery_datasets: [...]`; for any other custom GCP resource set `custom_terraform: true` and write the Terraform resource in `infra/custom.keep.tf` (referencing `module.service.runtime_service_account` and `var.project_id`). Reserve `unmet` only for non-repo/org-level gaps.
+2. Update `service.yaml` (and `config/jobs.yaml` if changing job schedules or `enabled` flags). Ensure any new app-owned external GCP resource (job, service, queue, secret ID) follows the `<prefix>-<resource>` naming standard. When connecting to pre-existing/shared resources, use `postgres_instance` + `postgres_secret` (or `postgres_external: true`), `bigquery_project` + `bigquery_datasets` (supports `project.dataset`), `existing_bucket`, `existing_secrets`, and `secret_map` so Terraform only grants IAM and mounts them without creating duplicates. For additional IAM roles use `extra_roles: ["roles/..."]`; for any other custom GCP resource set `custom_terraform: true` and write the Terraform resource in `infra/custom.keep.tf` (referencing `module.service.runtime_service_account` and `var.project_id`). Reserve `unmet` only for non-repo/org-level gaps.
 3. Validate and run the phases:
    ```bash
    python3 "$tmpdir/sdlc/scripts/sdlc.py" check service.yaml
