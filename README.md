@@ -1,10 +1,15 @@
 # opptra/agent-skills
 
-The skills every Opptra developer uses to create an app, change an app's capabilities or schedules, implement a feature, fix a bug, align an existing app, check a laptop, add a skill, change a skill, and fetch the latest skills. `opptra` only chooses which of those to run.
+The skills Opptra people use. `opptra` only chooses which of those to run.
+
+Org-wide skills cover mockups, branding, and one-page dashboards. Engineering skills cover creating an app, changing capabilities, implementing a feature, fixing a bug, and aligning a repository. Pointing a coding agent at this repository URL still installs the full set. First-time setup is unchanged: clone this repo and run `./install.sh`, or add it as the Cursor marketplace and enable the `opptra` plugin.
 
 | Skill | When |
 |---|---|
-| `opptra` | The developer describes the work and does not name a skill. Prints the route and follows that skill. |
+| `opptra` | The person describes the work and does not name a skill. Prints the route and follows that skill. |
+| `opptra-design-system` | A mockup, wireframe, prototype, HTML dashboard, or product screen. Loads https://opptra.github.io/opptra-design-system/. Does not create a GitHub app. |
+| `opptra-branding` | A presentation, document, email, or chart. For web UI, use `opptra-design-system`. |
+| `opptra-dashboard` | An internal one-page dashboard or tool (not a new GitHub app). Uses `opptra-design-system` for visuals. |
 | `create-app` | A new repository. Confirms archetype, name, auth, data, and prod project, runs the 5-phase generator, stops at `make dev`, and creates a private `opptra` repo only after a yes. |
 | `change-app` | Adding or updating a workload, scheduled job, cron schedule, database (`postgres`, `firestore`, `bigquery`), bucket, queue, or secret on an existing app. Updates `service.yaml`, runs `add-data` → `add-tests` → `sync-infra`, and opens an `infra/<ticket>-<slug>` pull request. |
 | `adopt-terraform` | Moving an existing app from `deploy.sh`, Cloud Build, Vercel, or manual GCP resources onto Terraform. Runs `sdlc.py discover-infra`, presents a Terraform Adoption Scorecard, and generates `service.yaml`, `infra/`, and declarative `imports.tf.example` blocks. |
@@ -24,7 +29,7 @@ The skills every Opptra developer uses to create an app, change an app's capabil
 
 ## Cursor
 
-Add this repository as a team marketplace and set the `opptra` plugin to Required. Cursor installs the skills for everyone on the team.
+Add this repository as a team marketplace and set the `opptra` plugin to Required. Cursor installs the skills for everyone on the team. The plugin name and source stay `opptra`. New skills land under `opptra/skills/` and are picked up by the same install.
 
 ## First install for Claude Code, Codex, OpenCode, and a local Cursor copy
 
