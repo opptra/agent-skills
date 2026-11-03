@@ -12,7 +12,7 @@ Do not write the skill into `~/.cursor/skills`, `~/.claude/skills`, `~/.codex/sk
 
 ## Ask
 
-Get the skill name, what it does, and when it should run. The name is lowercase letters, numbers, and hyphens, at most 64 characters, and it does not start or end with a hyphen. If `opptra/skills/<name>/SKILL.md` already exists, stop and say so.
+Get the skill name, what it does, when it should run, and whether it is org-wide (mockups, decks, emails, dashboards — no GitHub app) or engineering (`create-app`, `feature`, infra). Both kinds still go in `opptra/skills/<name>/`. The name is lowercase letters, numbers, and hyphens, at most 64 characters, and it does not start or end with a hyphen. If `opptra/skills/<name>/SKILL.md` already exists, stop and say so.
 
 ## Where to write
 
@@ -35,7 +35,7 @@ description: <what it does, in third person>. Use when <the words a developer wo
 
 The description states what the skill does and when to use it. It is third person, specific, and under 1024 characters. It does not say "I can" or "you can".
 
-Keep the file short. Put long reference material in `reference.md` beside `SKILL.md` and link it once. Omit `disable-model-invocation` on `opptra`, `create-app`, `change-app`, `align-app`, `adopt-terraform`, `feature`, and `bug`. Set `disable-model-invocation: true` on a skill that must be named, including `add-skill`, `modify-skill`, `fetch-skill`, and shared references.
+Keep the file short. Put long reference material in `reference.md` beside `SKILL.md` and link it once. Omit `disable-model-invocation` on `opptra`, `create-app`, `change-app`, `align-app`, `adopt-terraform`, `feature`, `bug`, `opptra-design-system`, `opptra-branding`, and `opptra-dashboard`. Set `disable-model-invocation: true` on a skill that must be named, including `add-skill`, `modify-skill`, `fetch-skill`, and shared references.
 
 Add one row to the skill table in `README.md`.
 

@@ -1,9 +1,9 @@
 {
   "name": "opptra",
-  "version": "0.6.0",
-  "description": "Opptra skills for choosing a route, creating an app, adopting Terraform, changing app capabilities or schedules, implementing a feature, fixing a bug, aligning an existing app, checking a laptop, adding a skill, changing a skill, and fetching the latest skills.",
+  "version": "0.7.0",
+  "description": "Opptra skills for choosing a route, applying the design system or branding, building a one-page dashboard, creating an app, adopting Terraform, changing app capabilities or schedules, implementing a feature, fixing a bug, aligning an existing app, checking a laptop, adding a skill, changing a skill, and fetching the latest skills.",
   "author": {
     "name": "Opptra"
   },
-  "keywords": ["opptra", "sdlc", "scaffold", "adopt-terraform", "change-app", "align-app", "feature", "bug", "doctor", "route"]
+  "keywords": ["opptra", "design-system", "branding", "dashboard", "sdlc", "scaffold", "adopt-terraform", "change-app", "align-app", "feature", "bug", "doctor", "route"]
 }
