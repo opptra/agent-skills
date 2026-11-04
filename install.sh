@@ -7,9 +7,19 @@ CACHE_DIR="${HOME}/.cache/opptra/sdlc-resources.git"
 
 mkdir -p "${HOME}/.claude/skills" "${HOME}/.codex/skills" "${HOME}/.cursor/skills" "${HOME}/.config/opencode/skills" "${HOME}/.local/bin"
 
-if [ -f "${ROOT}/bin/opptra" ]; then
-  chmod +x "${ROOT}/bin/opptra"
-  ln -sfn "${ROOT}/bin/opptra" "${HOME}/.local/bin/opptra"
+if [ -f "${ROOT}/bin/odlc" ]; then
+  chmod +x "${ROOT}/bin/odlc"
+  ln -sfn "${ROOT}/bin/odlc" "${HOME}/.local/bin/odlc"
+fi
+
+# Remove only the old CLI symlink installed by Opptra; preserve unrelated commands.
+legacy_cli="${HOME}/.local/bin/opptra"
+if [ -L "$legacy_cli" ]; then
+  legacy_target="$(readlink "$legacy_cli")"
+  if [ "$legacy_target" = "${ROOT}/bin/opptra" ] || \
+     grep -qF '# Unified Opptra SDLC CLI for both developers and AI agents.' "$legacy_cli" 2>/dev/null; then
+    unlink "$legacy_cli"
+  fi
 fi
 
 linked=()
