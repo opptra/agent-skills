@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Unified Opptra SDLC CLI for both developers and AI agents.
-# Wraps the cached `opptra/sdlc-resources` engine (`scripts/sdlc.py`) and machine checks.
+# Agent-facing odlc entrypoint for the Opptra SDLC.
+# Wraps the cached `opptra/sdlc-resources` engine (`scripts/odlc.py`) and machine checks.
 set -euo pipefail
 
 SOURCE="${BASH_SOURCE[0]}"
@@ -14,7 +14,7 @@ CACHE_DIR="${HOME}/.cache/opptra/sdlc-resources.git"
 
 usage() {
   cat <<'EOF'
-Usage: opptra <command> [args...]
+Usage: odlc <command> [args...]
 
 Commands:
   next [dir] [--json]                        Show current SDLC state, pending items, and next command
@@ -49,12 +49,12 @@ run_doctor() {
   if [[ -n "$skills_sha" ]]; then
     echo "1. Skills commit:    ok ($skills_sha)"
   else
-    echo "1. Skills commit:    fix (run opptra doctor --fix)"
+    echo "1. Skills commit:    fix (run odlc doctor --fix)"
   fi
   if [[ -d "$CACHE_DIR" ]] || [[ -d "${SKILLS_ROOT}/../sdlc-resources" ]]; then
     echo "2. Generator cache:  ok"
   else
-    echo "2. Generator cache:  fix (run opptra doctor --fix)"
+    echo "2. Generator cache:  fix (run odlc doctor --fix)"
   fi
   if gh auth status >/dev/null 2>&1; then
     echo "3. GitHub auth:      ok"
@@ -97,7 +97,7 @@ run_doctor() {
   if [[ -n "$expected_os" && "$actual_os" == "$expected_os" ]]; then
     echo "9. OpenSpec pin:     ok (${actual_os})"
   else
-    echo "9. OpenSpec pin:     fix (expected ${expected_os:-unknown}, got ${actual_os:-missing}; run: opptra doctor --fix)"
+    echo "9. OpenSpec pin:     fix (expected ${expected_os:-unknown}, got ${actual_os:-missing}; run: odlc doctor --fix)"
   fi
 }
 
@@ -159,21 +159,21 @@ fi
 case "$cmd" in
   check)
     target="${filtered_args[0]:-service.yaml}"
-    python3 "${repo}/scripts/sdlc.py" check "$target"
+    python3 "${repo}/scripts/odlc.py" check "$target"
     ;;
   discover)
-    python3 "${repo}/scripts/sdlc.py" discover-infra "${filtered_args[@]+"${filtered_args[@]}"}"
+    python3 "${repo}/scripts/odlc.py" discover-infra "${filtered_args[@]+"${filtered_args[@]}"}"
     ;;
   sync)
     if [[ ${#filtered_args[@]} -eq 0 ]]; then
-      python3 "${repo}/scripts/sdlc.py" sync-infra service.yaml .
+      python3 "${repo}/scripts/odlc.py" sync-infra service.yaml .
     elif [[ "${filtered_args[0]}" == --* ]]; then
-      python3 "${repo}/scripts/sdlc.py" sync-infra service.yaml . "${filtered_args[@]}"
+      python3 "${repo}/scripts/odlc.py" sync-infra service.yaml . "${filtered_args[@]}"
     else
-      python3 "${repo}/scripts/sdlc.py" sync-infra "${filtered_args[@]}"
+      python3 "${repo}/scripts/odlc.py" sync-infra "${filtered_args[@]}"
     fi
     ;;
   *)
-    python3 "${repo}/scripts/sdlc.py" "$cmd" "${filtered_args[@]+"${filtered_args[@]}"}"
+    python3 "${repo}/scripts/odlc.py" "$cmd" "${filtered_args[@]+"${filtered_args[@]}"}"
     ;;
 esac

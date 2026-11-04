@@ -23,7 +23,7 @@ Org-wide skills cover mockups, branding, and one-page dashboards. Engineering sk
 | `fetch-skill` | Fetches `main` of this repository, refreshes the local generator cache, and links every skill into Cursor, Claude Code, Codex, and OpenCode via `./install.sh`. |
 | `doctor` | Checks this machine: skills commit, local generator cache, `gh`, Linear, Python, `uv`, Node, `terraform`, and the pinned OpenSpec. Auto-fixes skill links and OpenSpec version when asked. |
 
-`opptra/sdlc-resources` stays the library: the mapping, the skeletons, the phase CLI (`scripts/sdlc.py`), the Terraform modules, and the workflows. `./install.sh` maintains a local bare cache at `~/.cache/opptra/sdlc-resources.git` so generator runs are instant and work offline.
+`opptra/sdlc-resources` stays the library: the mapping, the skeletons, the phase CLI (`scripts/odlc.py`), the Terraform modules, and the workflows. `./install.sh` maintains a local bare cache at `~/.cache/opptra/sdlc-resources.git` so generator runs are instant and work offline.
 
 `main` does not deploy. A push to `staging` deploys staging. A merge into `production` deploys production.
 
@@ -38,6 +38,6 @@ git clone https://github.com/opptra/agent-skills.git ~/agent-skills
 ~/agent-skills/install.sh
 ```
 
-`install.sh` also links the **`opptra` CLI** into `~/.local/bin/opptra` (`opptra next`, `opptra doctor [--fix]`, `opptra status`, `opptra check`, `opptra discover`, `opptra sync`, `opptra secrets`).
+`install.sh` also links the agent-facing **`odlc` CLI** into `~/.local/bin/odlc` and removes the old installer-managed `opptra` CLI symlink. Agents use it to reuse the cached generator and run checks, phases, and status commands with less repeated setup. Developers describe their task in chat; manual CLI use is optional. The `opptra` plugin and routing skill keep their names.
 
 After that, ask the agent to fetch Opptra skills. The `fetch-skill` skill pulls `main`, refreshes the local generator cache, and re-runs `./install.sh`.

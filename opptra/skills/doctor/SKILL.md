@@ -1,11 +1,11 @@
 ---
 name: doctor
-description: Checks that this machine can use Opptra skills. Use when a developer asks if they are set up, says opptra doctor, or is about to create an app and the tools may be missing. Does not score a repository and does not scaffold one.
+description: Checks that this machine can use Opptra skills. Use when a developer asks if they are set up, says odlc doctor, or is about to create an app and the tools may be missing. Does not score a repository and does not scaffold one.
 ---
 
 # Doctor
 
-This skill checks the laptop. It does not write an app, and it does not print the 17-point scorecard. `sdlc.py doctor` is a different command: it aliases `sdlc.py status --table` inside a repository.
+This skill checks the laptop. It does not write an app, and it does not print the 17-point scorecard. The installed `odlc doctor` checks machine readiness. The engine-only `python3 scripts/odlc.py doctor` is a legacy alias for repository status; use `odlc status --table` for that purpose. Run the installed command yourself when available, and check Linear through the active agent's connector separately.
 
 Read Pins in `../session/SKILL.md` and print the route banner first:
 
