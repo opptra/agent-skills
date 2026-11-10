@@ -4,6 +4,11 @@ description: Adds a new Opptra skill to the opptra/agent-skills repository and o
 disable-model-invocation: true
 ---
 
+
+## Skill version check
+
+Before following this skill, read and follow [Skill freshness](../session/SKILL.md#skill-freshness). Run it once per user request, including when this skill is invoked directly. A route or shared reference within the same request reuses that result. After an update, reread this file and any shared instructions before continuing.
+
 # Add a skill
 
 A team skill is a folder in this repository at `opptra/skills/<name>/SKILL.md`. Cursor discovers it from that folder. Do not edit `.cursor-plugin/marketplace.json` or `opptra/.cursor-plugin/plugin.json` to register it.
@@ -29,6 +34,10 @@ description: <what it does, in third person>. Use when <the words a developer wo
 ---
 
 # <Title>
+
+## Skill version check
+
+Before following this skill, read and follow [Skill freshness](../session/SKILL.md#skill-freshness). Run it once per user request, including when this skill is invoked directly. A route or shared reference within the same request reuses that result. After an update, reread this file and any shared instructions before continuing.
 
 <Steps the agent follows. Include the exact commands when the steps must not vary.>
 ```

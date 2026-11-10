@@ -3,6 +3,11 @@ name: opptra-design-system
 description: Applies Opptra design system 0.1.0 — brand language, semantic tokens, and 27 component contracts — to mockups, wireframes, prototypes, HTML dashboards, and product UI. Use when someone asks to mock up a screen, change a page, design a dashboard, review UI, or make product UI look like Opptra. For presentations, documents, emails, and charts, use opptra-branding instead.
 ---
 
+
+## Skill version check
+
+Before following this skill, read and follow [Skill freshness](../session/SKILL.md#skill-freshness). Run it once per user request, including when this skill is invoked directly. A route or shared reference within the same request reuses that result. After an update, reread this file and any shared instructions before continuing.
+
 # Opptra design system
 
 Use published reference **0.1.0**. Follow the user's scope. Do not create a GitHub app, run `create-app`, or ask for GCP, Linear, or `service.yaml`.

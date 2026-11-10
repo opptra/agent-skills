@@ -4,6 +4,11 @@ description: Changes an existing Opptra skill in the opptra/agent-skills reposit
 disable-model-invocation: true
 ---
 
+
+## Skill version check
+
+Before following this skill, read and follow [Skill freshness](../session/SKILL.md#skill-freshness). Run it once per user request, including when this skill is invoked directly. A route or shared reference within the same request reuses that result. After an update, reread this file and any shared instructions before continuing.
+
 # Modify a skill
 
 A team skill is a folder in this repository at `opptra/skills/<name>/SKILL.md`. Change that folder. Do not edit `.cursor-plugin/marketplace.json` or `opptra/.cursor-plugin/plugin.json` to register a skill.

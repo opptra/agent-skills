@@ -3,9 +3,14 @@ name: create-app
 description: Scaffolds a new Opptra app by reading the Linear issue and any local plan, showing a 17-point blueprint table, writing service.yaml, and running the 5-phase generator from opptra/sdlc-resources. Use when a developer asks to create, scaffold, or set up a new app or repository.
 ---
 
+
+## Skill version check
+
+Before following this skill, read and follow [Skill freshness](../session/SKILL.md#skill-freshness). Run it once per user request, including when this skill is invoked directly. A route or shared reference within the same request reuses that result. After an update, reread this file and any shared instructions before continuing.
+
 # Create an app
 
-You fill in facts, run the deterministic phase scripts in `opptra/sdlc-resources`, and customize the application entrypoints, data helpers, and unit tests in between. The generator decides `infra/`, `.github/workflows/`, and the managed rule blocks. Never hand-edit `.github/workflows/` or `infra/`.
+Use the generator to bootstrap infrastructure, workflows, and rules. The app owns Terraform and workflows after handoff. Follow the ownership and file map in [session](../session/SKILL.md).
 
 Create the GitHub repository only after `make dev` passes and the developer says yes. It is a private repository in `opptra`. Then push `main`, `staging`, and `production`, and create the GitHub environments `staging` and `production`. Do not run `scripts/bind-staging.sh` or `scripts/bind-production.sh` unless they say they have permission and ask you to. Staging bind does not need production IAM. Production bind is a file they send to someone who can change IAM in `prod_project`. Do not run `protect-branches.sh`. Branch protection is an organization ruleset. Do not leave a checkout of `opptra/sdlc-resources` on the machine.
 
@@ -18,7 +23,7 @@ Read Pins in `../session/SKILL.md`. Print the route banner first, including thos
 ```text
 Route: create-app | Phases: 1. Manifest  2. Runtime & OpenSpec  3. Data/Cloud  4. Tests  5. Infra/CI/Rules & Local Verification
 Human Gates: Gate 1 — Approve short blueprint; Gate 2 — Create private GitHub repo after local make ci passes (and before any bind script)
-Script-Owned Paths: infra/, .github/workflows/, managed rule blocks in AGENTS.md & CLAUDE.md
+Bootstrap Outputs: infra/, .github/workflows/, managed rule blocks in AGENTS.md & CLAUDE.md
 ```
 
 1. **Resume check:** If `.sdlc/state.yaml` already exists in the target directory, read it and offer to resume from the next uncompleted phase instead of re-interviewing.
@@ -98,14 +103,14 @@ python3 "$tmpdir/sdlc/scripts/sdlc.py" check "<target-dir>/service.yaml"
    python3 "$tmpdir/sdlc/scripts/sdlc.py" sync-infra "$tmpdir/service.yaml" "<target-dir>"
    python3 "$tmpdir/sdlc/scripts/sdlc.py" status "<target-dir>" --table
    python3 "$tmpdir/sdlc/scripts/sdlc.py" status "<target-dir>" --check
-   rm -rf "$tmpdir"
    ```
 3. **Run and verify the generated `.githooks/` and `make ci`:**
-   - Execute `.githooks/pre-commit` and `make ci` inside `<target-dir>`.
+   - For Terraform apps, run `terraform fmt -recursive` inside `<target-dir>`. Then execute `.githooks/pre-commit` and `make ci`.
    - If any lint, formatting, or test issue is auto-resolvable, fix it immediately and re-run until `.githooks/pre-commit` and `make ci` exit `0`.
    - If a check fails due to something that cannot be resolved without user input, explain the exact failure and ask the developer whether to provide the input now or disable that specific check (`run_tests: false` or `run_lint: false`) in `service.yaml` (recording the reason under `unmet`).
 4. Push the agreed requirements and blueprint summary to the Linear issue.
-5. Never hand-edit `infra/` or `.github/workflows/`.
+5. After verification, set `infra_management: app-owned` in the app's root `service.yaml`. For Cloud Run services and jobs, run `odlc setup-promotion service.yaml . --workflow-ref <published-sdlc-commit> --replace-bootstrap-workflows` from the app. Review the generated state locations, caller, and helper scripts. VM workers keep their VM deploy caller. Config-only apps have no Terraform promotion. Run `odlc sync service.yaml .` for the app-owned rules and remove the temporary generator checkout. When the CLI is unavailable, use the same commands through the handoff-aware generator checkout.
+6. Configure the deployment and planning environments using [handoff and promotion](https://github.com/opptra/sdlc-resources/blob/main/docs/infra-handoff.md). Initialize branch protections and use the first staged push after credentials and registry setup.
 
 ## 4. Summary scorecard, then next steps
 
@@ -136,10 +141,11 @@ Say what was created: app name, directory, workloads, data store, bucket, queue,
    gh repo create opptra/<name> --private --source=. --remote=origin --push
    git branch staging
    git branch production
-   git push -u origin staging
    git push -u origin production
    gh api --method PUT "repos/opptra/<name>/environments/staging"
    gh api --method PUT "repos/opptra/<name>/environments/production"
+   gh api --method PUT "repos/opptra/<name>/environments/staging-plan"
+   gh api --method PUT "repos/opptra/<name>/environments/production-plan"
    ```
    Run Generator checkout again and record the slug. `sdlc.py` is not copied into the app:
    ```bash
@@ -156,10 +162,10 @@ Say what was created: app name, directory, workloads, data store, bucket, queue,
      ./scripts/bind-production.sh opptra/<name> <prod_project>
    (Then run the two `gh variable set` commands it prints.)
    ```
-   A direct push to `staging` deploys staging. A pull request from `main` into `production` is the only deploy that comes from `main`. Do not merge `main` into `staging`. The steps are in `docs/bind.md` of `opptra/sdlc-resources`.
+   These scripts cover the legacy deployer setup. For the promotion workflow, the platform administrator sets the separate plan and apply identities described in the handoff guide. A direct push to `staging` deploys staging. A pull request from `main` into `production` is the only deploy that comes from `main`. Do not merge `main` into `staging`. The steps are in `docs/bind.md` of `opptra/sdlc-resources`.
 4. **Build the first feature slice locally with `/feature`.**
    The scaffold is the platform shell. Port or build product behaviour one `/feature` pull request at a time.
-5. **Try staging only after bind-staging has succeeded and they ask.** Push the branch directly to `staging` and read the Terraform plan. Confirm the jobs, schedules, and webhook match `service.yaml`. A disabled job must have no Scheduler entry. Merging to `main` does not update staging. Then print the ship card from `../session/SKILL.md`.
+5. **Try staging only after bind-staging has succeeded and they ask.** Push the branch directly to `staging` after configuring the promotion environments and registry. Confirm the jobs, schedules, and webhook match Terraform. A disabled job must have no Scheduler entry. Merging to `main` does not update staging. Then print the ship card from `../session/SKILL.md`.
 6. **Put secret values into Secret Manager and close `unmet` items.** The scaffold only created secret ids. Close each `unmet` item (such as a data import or project billing budget) in its own pull request.
 
 If those feature slices are already known, ask **once**: pause for review after each slice, or run each slice through its checks without stopping.

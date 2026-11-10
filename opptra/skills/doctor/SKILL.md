@@ -3,6 +3,11 @@ name: doctor
 description: Checks that this machine can use Opptra skills. Use when a developer asks if they are set up, says odlc doctor, or is about to create an app and the tools may be missing. Does not score a repository and does not scaffold one.
 ---
 
+
+## Skill version check
+
+Before following this skill, read and follow [Skill freshness](../session/SKILL.md#skill-freshness). Run it once per user request, including when this skill is invoked directly. A route or shared reference within the same request reuses that result. After an update, reread this file and any shared instructions before continuing.
+
 # Doctor
 
 This skill checks the laptop. It does not write an app, and it does not print the 17-point scorecard. The installed `odlc doctor` checks machine readiness. The engine-only `python3 scripts/odlc.py doctor` is a legacy alias for repository status; use `odlc status --table` for that purpose. Run the installed command yourself when available, and check Linear through the active agent's connector separately.

@@ -15,6 +15,11 @@ description: >-
   Do not create a GitHub app or run create-app.
 ---
 
+
+## Skill version check
+
+Before following this skill, read and follow [Skill freshness](../session/SKILL.md#skill-freshness). Run it once per user request, including when this skill is invoked directly. A route or shared reference within the same request reuses that result. After an update, reread this file and any shared instructions before continuing.
+
 # Opptra Dashboard Skill
 
 Read `../opptra-design-system/SKILL.md` before writing styles. This is a
