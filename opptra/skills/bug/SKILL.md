@@ -3,6 +3,11 @@ name: bug
 description: Fixes a Linear bug with a failing test first on a branch off main, reusing the current branch's Linear ticket when related (or creating/reading one after confirming the bug plan), and running local hooks and make ci before committing. Use when a developer gives a bug ticket id or asks to fix a bug.
 ---
 
+
+## Skill version check
+
+Before following this skill, read and follow [Skill freshness](../session/SKILL.md#skill-freshness). Run it once per user request, including when this skill is invoked directly. A route or shared reference within the same request reuses that result. After an update, reread this file and any shared instructions before continuing.
+
 # Bug
 
 Use a streamlined **2-Gate confirmation flow**:
@@ -15,7 +20,7 @@ Use a streamlined **2-Gate confirmation flow**:
 Route: bug | Branch: fix/<ticket-id>-<slug>
 Stages: 1. Root Cause & Linear Check (Gate 1)  2. Failing Reproduction Test & Minimal Fix  3. Auto Hooks & make ci  4. Commit & PR to main (Gate 2)
 Human Gates: Gate 1 — Approve Root Cause & Fix Plan; Gate 2 — Commit, push, and open PR after make ci passes
-Forbidden in this Route: Hand-editing infra/ or .github/workflows/ (use change-app for infra/schedule changes)
+Infrastructure: Follow the ownership and file map in ../session/SKILL.md.
 ```
 
 ## Steps
@@ -23,7 +28,7 @@ Forbidden in this Route: Hand-editing infra/ or .github/workflows/ (use change-a
 1. **Understand the bug, locate the root cause, and resolve the Linear ticket (Gate 1).** Follow Resume in `../session/SKILL.md`. Inspect the code to pinpoint the root cause, confirm the fix plan with the developer, then read and follow `../linear-continuity/SKILL.md`. When you create or update the issue, include the reproduction steps, expected result, and actual result. Add a bug note only when that note is not already on the issue. When the developer approves the plan, write `.sdlc/intent.yaml` with `route: bug` and no `depth`, before the test. Do not invent a ticket id.
 2. **Read `service.yaml`, `AGENTS.md` (including `## Product contract`), and `.cursor/rules/*.mdc`:**
    - If the fix needs a product or design choice, stop and follow the `feature` skill, including an OpenSpec.
-   - If the fix requires changing `service.yaml`, `config/jobs.yaml` schedules, `infra/`, or `.github/workflows/`, follow `../change-app/SKILL.md` in this same chat to open that `infra/<ticket-id>-<slug>` pull request first, then immediately cut `fix/<ticket-id>-<slug>` stacked on top of `infra/<ticket-id>-<slug>` (`next_step: code-stacked-on-infra`) so you can write the failing test and fix locally right away without waiting for the infra PR to merge.
+   - Follow **Find the owner of a deployment setting** in [session](../session/SKILL.md). In an app-owned repo, include coupled Terraform and code changes on this branch and in the same PR. Use a separate infrastructure PR for a prerequisite that must land first. In a generator-owned repo, use `change-app` and preserve the existing stacked PR flow.
 3. **Branch (if not already on the active ticket branch):**
    - Branch from `main` (or from `infra/<ticket-id>-<short-slug>` when stacked) as `fix/<ticket-id>-<short-slug>`.
 4. **Failing test first, then minimal fix:**

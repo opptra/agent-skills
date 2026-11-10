@@ -3,6 +3,11 @@ name: align-app
 description: Inspects an existing repository with the Opptra 17-point SDLC scorecard, strongly recommends OpenSpec and Linear setup, audits all 10 agentic rule pillars, and applies accepted changes in phases without overwriting product rules. Use when a developer asks to align, migrate, audit, or update an existing app to the SDLC standard.
 ---
 
+
+## Skill version check
+
+Before following this skill, read and follow [Skill freshness](../session/SKILL.md#skill-freshness). Run it once per user request, including when this skill is invoked directly. A route or shared reference within the same request reuses that result. After an update, reread this file and any shared instructions before continuing.
+
 # Align an existing app
 
 Run this inside the repository the developer has open. Do not create a new repository. Do not delete a deploy script, move a live host, or run `terraform import` without explicit confirmation. Never overwrite existing domain rules under `## Product contract` in `AGENTS.md` or `CLAUDE.md`.
@@ -57,14 +62,16 @@ Inside Make the agent safe, honor a single exception such as "skip OpenSpec". Do
 
 ## 3. Apply the accepted path
 
+Read `infra_management` and the file map in [session](../session/SKILL.md). In an app-owned repo, run read-only checks, preserve the Product contract, and edit the owning files for the approved alignment changes. Use rules-only sync for managed rules. A CI-only alignment of an app on a legacy host does not activate Terraform promotion. Route a requested host cutover to `adopt-terraform`.
+
 Path 1 writes nothing. Path 3 follows `adopt-terraform`. Path 2 does the steps below. If the repo still deploys through `deploy/*.sh`, `vercel.json`, `fly.toml`, or `cloudbuild.yaml`, pass `--ci-only` and leave that deploy path in place.
 
 1. Write `service.yaml` and validate with `python3 "$tmpdir/sdlc/scripts/sdlc.py" check service.yaml`.
-2. For a legacy deploy path, run:
+2. For a legacy deploy path that is still generator-owned, run:
    ```bash
    python3 "$tmpdir/sdlc/scripts/sdlc.py" sync-infra service.yaml . --ci-only
    ```
-   When there is no legacy deploy path, run `add-data`, `add-tests`, and `sync-infra` without `--ci-only`.
+   For generator-owned scaffolds without a legacy deploy path, run `add-data`, `add-tests`, and `sync-infra` without `--ci-only`.
 3. Install the pinned OpenSpec unless they skipped it. Follow OpenSpec pin in `../session/SKILL.md`. Do not install `@latest`. Then run `openspec init --tools cursor,claude` when `openspec/` is missing or only contains `.gitkeep`.
 4. Create `staging` and `production` branches from `main` when missing.
 5. If the Linear rule is missing from the scorecard, or the Linear connection cannot read an issue, connect Linear in Cursor or Claude in this turn. Read and follow `../linear-continuity/SKILL.md`. When you create or update the issue, include the alignment plan and the path they accepted. Do not invent a ticket id.

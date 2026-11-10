@@ -74,6 +74,23 @@ class OdlcInstallTests(unittest.TestCase):
                                 env=env, check=True, capture_output=True, text=True)
         self.assertEqual(result.stdout.strip(), "['next', 'app with spaces', '--json']")
 
+    def test_old_engine_is_blocked_when_target_owns_infrastructure(self):
+        engine = self.base / 'engine/scripts'
+        engine.mkdir(parents=True)
+        (engine / 'generate.py').write_text('# legacy generator\n')
+        (engine / 'odlc.py').write_text('raise AssertionError("unsafe legacy engine called")\n')
+        target = self.base / 'app with spaces'
+        target.mkdir()
+        (target / 'service.yaml').write_text('infra_management: "app-owned" # committed handoff\n')
+        incoming = self.base / 'bootstrap.yaml'
+        incoming.write_text('name: bootstrap\n')
+        env = dict(self.env, OPPTRA_SDLC_PATH=str(engine.parent))
+        for args in (('sync', str(incoming), str(target)), ('all', str(incoming), str(target))):
+            result = subprocess.run(['bash', str(self.repo / 'bin/odlc'), *args], env=env,
+                                    capture_output=True, text=True)
+            self.assertEqual(result.returncode, 2, result.stderr)
+            self.assertIn('handoff-aware engine', result.stderr)
+
 
 if __name__ == '__main__':
     unittest.main()

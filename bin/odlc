@@ -24,7 +24,7 @@ Commands:
   discover [dir] [--table|--json|--propose-manifest|--write-imports <service.yaml>]
                                              Scan brownfield repo for GCP resources, secrets, and imports
   sync [service.yaml] [dest] [--ci-only] [--upgrade]
-                                             Regenerate infra/, workflows, rules, and runtime SDK
+                                             Bootstrap infra and workflows, or refresh rules after handoff
   secrets [dir] [--env staging|prod] [--json]
                                              List resolved GCP Secret Manager IDs for service.yaml
   init-runtime <service.yaml> [dest] [--overwrite]
@@ -32,6 +32,7 @@ Commands:
   add-tests <service.yaml> [dest]
   sync-infra <service.yaml> [dest] [--ci-only]
   all <service.yaml> [dest]
+  setup-promotion <service.yaml> [dest] --workflow-ref <sha>
   set-github-repo <org/repo> [dest]
 EOF
 }
@@ -133,6 +134,47 @@ for arg in "$@"; do
   fi
 done
 
+# A pinned engine predating the handoff must never write into an app-owned repo.
+# The manifest format uses a root key and a plain or quoted scalar.
+app_owned() {
+  [[ -f "$1" ]] && LC_ALL=C grep -Eq "^[[:space:]]*infra_management:[[:space:]]*['\"]?app-owned['\"]?([[:space:]]*(#.*)?)$" "$1"
+}
+
+owned=0
+case "$cmd" in
+  sync|sync-infra|all|init-runtime|add-data|add-tests|setup-promotion)
+    paths=()
+    for arg in "${filtered_args[@]+"${filtered_args[@]}"}"; do
+      [[ "$arg" == --* ]] || paths+=("$arg")
+    done
+    if app_owned "${paths[0]:-service.yaml}" || app_owned "${paths[1]:-.}/service.yaml"; then
+      owned=1
+    fi
+    ;;
+  discover|discover-infra)
+    target=.
+    if [[ "${filtered_args[0]:-}" != --* && -n "${filtered_args[0]:-}" ]]; then
+      target="${filtered_args[0]}"
+    fi
+    for arg in "${filtered_args[@]+"${filtered_args[@]}"}"; do
+      if [[ "$arg" == --write-imports ]] && app_owned "$target/service.yaml"; then
+        owned=1
+      fi
+    done
+    ;;
+  check)
+    if app_owned "${filtered_args[0]:-service.yaml}"; then owned=1; fi
+    ;;
+  status|next|secrets)
+    for arg in "${filtered_args[@]+"${filtered_args[@]}"}"; do
+      [[ "$arg" == --* ]] && continue
+      if app_owned "$arg/service.yaml"; then owned=1; fi
+      break
+    done
+    if app_owned service.yaml; then owned=1; fi
+    ;;
+esac
+
 if [[ -n "${OPPTRA_SDLC_PATH:-}" && -d "${OPPTRA_SDLC_PATH}" ]]; then
   cp -R "${OPPTRA_SDLC_PATH}" "$repo"
 elif [[ -d "${SKILLS_ROOT}/../sdlc-resources/scripts" && ( -z "$sha" || "$upgrade" == "1" ) ]]; then
@@ -154,6 +196,11 @@ else
   else
     git -C "$repo" checkout --detach refs/heads/main >/dev/null 2>&1 || git -C "$repo" checkout --detach HEAD >/dev/null 2>&1
   fi
+fi
+
+if [[ "$owned" == 1 ]] && ! grep -q '^def app_owns_infra(' "${repo}/scripts/generate.py"; then
+  echo "This app owns its infrastructure. Use odlc $cmd --upgrade with the original arguments to select a handoff-aware engine." >&2
+  exit 2
 fi
 
 case "$cmd" in

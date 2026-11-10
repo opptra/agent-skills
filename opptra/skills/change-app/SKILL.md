@@ -1,15 +1,24 @@
 ---
 name: change-app
-description: Adds or updates workloads, scheduled jobs, cron schedules, regions, databases, buckets, queues, or secrets on an existing Opptra app by updating service.yaml and running the phase scripts from opptra/sdlc-resources. Use when a developer asks to add a database, bucket, queue, webhook, job, UI, or schedule change to an existing app.
+description: Changes an existing Opptra app’s workloads, data resources, IAM, secrets, schedules, or runtime settings. Edits the owning Terraform or pipeline inputs after handoff and uses the pinned generator for legacy repos.
 ---
+
+
+## Skill version check
+
+Before following this skill, read and follow [Skill freshness](../session/SKILL.md#skill-freshness). Run it once per user request, including when this skill is invoked directly. A route or shared reference within the same request reuses that result. After an update, reread this file and any shared instructions before continuing.
 
 # Change an app's capabilities or schedules
 
-Product code and changes to `service.yaml`, `config/jobs.yaml` schedules, `infra/`, or `.github/workflows/` belong in separate pull requests. Use this skill when an existing app needs a new workload, a new capability (`postgres`, `firestore`, `bigquery`, `bucket`, `queue`, `secrets`, `alerts`), a per-component `region`, a new scheduled job, or a cron/enable flag change.
+Use this skill for infrastructure-only work. For a feature or bug with coupled infrastructure, follow that skill and include the changes in the same PR when the app owns its infrastructure.
 
-Before you edit files, read Pins in `../session/SKILL.md`, print the Route Banner with those two lines, tell the developer what you will change in `service.yaml` and which files the phase scripts will regenerate, and wait for a yes (**Gate 1**). After running the phase scripts and verifying `.githooks/pre-commit` and `make ci`, show the commit message, file list, branch name, and pull request title/body together in one prompt and wait for a yes (**Gate 2**).
+Before you edit files, read Pins in `../session/SKILL.md`, print the Route Banner with those two lines, tell the developer which owning files will change and which files will be generated if the repo still uses the generator, and wait for a yes (**Gate 1**). After running the phase scripts and verifying `.githooks/pre-commit` and `make ci`, show the commit message, file list, branch name, and pull request title/body together in one prompt and wait for a yes (**Gate 2**).
 
-## 1. Route Banner & Understand
+## App-owned repositories
+
+Read **Find the owner of a deployment setting** in [session](../session/SKILL.md). Reuse the Linear ticket when it covers the request. For standalone work, use `infra/<ticket>-<slug>`. Edit the owning Terraform, environment inputs, or workflow caller. Preserve state keys and resource addresses, and update `.env.example` for new runtime names. Run hooks and `make ci`, review the Terraform plan for the affected environment, and open the infrastructure PR. Use the developer's normal staging and promotion flow.
+
+## 1. Route Banner & Understand for generator-owned repositories
 
 ```text
 Route: change-app | Branch: infra/<ticket-id>-<slug>

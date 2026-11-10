@@ -3,6 +3,11 @@ name: opptra
 description: Chooses the Opptra route from a sentence when the developer has not named a skill. Use when someone describes a new app, a bug, a feature, a mockup, a presentation, an email, a dashboard, an alignment, a Terraform move, a capability change, or asks whether they are set up, and does not say which skill to run.
 ---
 
+
+## Skill version check
+
+Before following this skill, read and follow [Skill freshness](../session/SKILL.md#skill-freshness). Run it once per user request, including when this skill is invoked directly. A route or shared reference within the same request reuses that result. After an update, reread this file and any shared instructions before continuing.
+
 # Opptra
 
 This skill only picks the route. Print one line, then read that skill's `SKILL.md` and follow it. Do not do the work in this file.
@@ -29,6 +34,6 @@ Route: <skill> | Why: <one sentence>
 
 A mockup, deck, email, or one-page dashboard is not a new repository. Do not route those to `create-app`.
 
-A capability change and a product change are two pull requests. Stay in this chat. Follow `change-app`, open the `infra/<ticket>-<slug>` pull request, and immediately stack `feat/<ticket>-<slug>` (or `fix/<ticket>-<slug>`) on top of that infra branch (`next_step: code-stacked-on-infra`) so product coding and local testing continue without waiting for the infra merge. Do not end the chat between them.
+For a feature or bug that also changes infrastructure, read the ownership map in [session](../session/SKILL.md). App-owned repositories can include both in one PR. Generator-owned repositories use `change-app` and the legacy stacked PR flow. Stay in this chat while continuing the selected route.
 
 If two routes fit and you cannot tell which, ask once.

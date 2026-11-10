@@ -3,6 +3,11 @@ name: adopt-terraform
 description: Analyzes an existing repository's deploy scripts, Dockerfiles, and GCP resources, presents a Terraform Adoption Scorecard, and generates service.yaml, infra/, and declarative Terraform import blocks. Use when a developer asks to move an existing app onto Terraform, replace deploy.sh, or set up GCP Terraform for a repo.
 ---
 
+
+## Skill version check
+
+Before following this skill, read and follow [Skill freshness](../session/SKILL.md#skill-freshness). Run it once per user request, including when this skill is invoked directly. A route or shared reference within the same request reuses that result. After an update, reread this file and any shared instructions before continuing.
+
 # Adopt Terraform for an existing app
 
 Use this skill when an existing repository deploys through shell scripts (`deploy.sh`), Cloud Build (`cloudbuild.yaml`), Vercel, Fly.io, or manual `gcloud` commands and wants to move its GCP resources under Opptra's standard Terraform (`infra/`) and GitHub Actions workflows without recreating live production services, jobs, or secrets.
@@ -44,7 +49,11 @@ Also highlight any custom flags in `deploy.sh` or `cloudbuild.yaml` (such as per
 
 Ask the developer to confirm which resources already exist in `prod_project` (to be imported) versus which are brand new.
 
-## 3. Generate `service.yaml`, `infra/`, Workflows & Declarative Imports
+## 3. Bootstrap or continue from existing Terraform
+
+Read the ownership and file map in [session](../session/SKILL.md). If Terraform already deploys staging or the app owns its files, use the checked-in Terraform. Preserve its backend and resource addresses. Use the generator phases below only for a fresh bootstrap. Use read-only discovery against the live project and classify each item as create, import, or reference. For imports, verify the exact project, region, cloud ID, live settings, and target resource address. Keep imports production-scoped, for example through `for_each` with an empty staging map. Shared resources remain references.
+
+### Generate the initial files
 
 1. Branch from `main` as `infra/<ticket-id>-adopt-terraform`.
 2. Write or update `service.yaml` with all discovered components, per-component `region`, `path` / `frontend_path`, `jobs` (commands, crons, memory, timeouts), `secrets`, `database`, `bucket`, `queue`, and `alerts`.
@@ -60,10 +69,7 @@ Ask the developer to confirm which resources already exist in `prod_project` (to
 
 ## 4. Summary and Safe Cutover Steps
 
-End with a summary of the Terraform modules and `import {}` blocks generated, followed by the cutover steps in order:
-
-1. **Bind staging before production.** `scripts/bind-staging.sh` needs IAM on `opptra-staging` only. It creates `<app>-deployer` there and prints `WIF_PROVIDER_STAGING` and `WIF_SERVICE_ACCOUNT_STAGING`. Do not run it unless the developer asks. `scripts/bind-production.sh` is for someone who can change IAM in `prod_project`. Staging can be tried before that production bind exists.
-2. **Push the branch directly to `staging` first:** Verify the staging build and Terraform apply create/update the staging resources cleanly. Do not merge `main` into `staging`.
-3. **Open the pull request into `main` and read the `terraform plan` comment:** Confirm the plan imports existing resources in place and shows **0 to destroy** on databases, buckets, and live services.
-4. **Promote `main` to `production`:** Open a pull request from `main` into `production` and merge it.
-5. **Retire legacy deploy scripts:** Only after the first `production` Terraform apply succeeds, delete `deploy/*.sh` in a follow-up pull request.
+1. Verify staging first. An empty staging project plans creates. An existing Terraform staging deployment should show a no-op for an ownership-only change. Keep its state location and addresses.
+2. Record `infra_management: app-owned` in the repository. Prepare the pinned promotion caller and environment identities using [handoff and promotion](https://github.com/opptra/sdlc-resources/blob/main/docs/infra-handoff.md). Keep deploy triggers and workload-specific migration, traffic, and health checks in the active workflow. Arrange a single production writer at cutover.
+3. For a production import, set the caller's `adoption_image` to the exact live image and match live configuration. Open the promotion PR from `main` into `production` and review the actual production plan. Expect the reviewed imports and zero resource updates, creates, replacements, or deletes. Handle deliberate changes in a later promotion.
+4. Merge the approved production PR to apply via Actions and verify the application and a clean follow-up plan. Retire the old release path and remove the temporary adoption input in a follow-up release.

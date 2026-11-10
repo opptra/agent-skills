@@ -3,6 +3,11 @@ name: opptra-branding
 description: Applies Opptra brand identity to presentations, documents, emails, charts, and other non-UI assets. Use when someone asks for a deck, slide, memo, email, summary visual, or chart. For web UI, React apps, wireframes, HTML dashboards, or product screens, use opptra-design-system instead.
 ---
 
+
+## Skill version check
+
+Before following this skill, read and follow [Skill freshness](../session/SKILL.md#skill-freshness). Run it once per user request, including when this skill is invoked directly. A route or shared reference within the same request reuses that result. After an update, reread this file and any shared instructions before continuing.
+
 # Opptra branding
 
 Use this skill for presentations, documents, emails, and charts. For product UI, mockups, wireframes, or HTML dashboards, read `../opptra-design-system/SKILL.md` and stop here.

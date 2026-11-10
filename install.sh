@@ -5,6 +5,14 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CACHE_DIR="${HOME}/.cache/opptra/sdlc-resources.git"
 
+skills_only=0
+if [ "${1:-}" = "--skills-only" ] && [ "$#" -eq 1 ]; then
+  skills_only=1
+elif [ "$#" -gt 0 ]; then
+  echo "Usage: install.sh [--skills-only]" >&2
+  exit 2
+fi
+
 mkdir -p "${HOME}/.claude/skills" "${HOME}/.codex/skills" "${HOME}/.cursor/skills" "${HOME}/.config/opencode/skills" "${HOME}/.local/bin"
 
 if [ -f "${ROOT}/bin/odlc" ]; then
@@ -34,7 +42,24 @@ for dir in "${ROOT}"/opptra/skills/*/; do
   linked+=("$name")
 done
 
+# Remove stale links owned by this checkout after a skill is removed or renamed.
+for skill_home in "${HOME}/.claude/skills" "${HOME}/.codex/skills" "${HOME}/.cursor/skills" "${HOME}/.config/opencode/skills"; do
+  for link in "$skill_home"/*; do
+    [ -L "$link" ] || continue
+    target="$(readlink "$link")"
+    case "$target" in
+      "${ROOT}/opptra/skills/"*)
+        [ -f "$link/SKILL.md" ] || unlink "$link"
+        ;;
+    esac
+  done
+done
+
 echo "Linked ${#linked[@]} Opptra skills: ${linked[*]}"
+
+if [ "$skills_only" -eq 1 ]; then
+  exit 0
+fi
 
 # Warm or refresh local bare cache of opptra/sdlc-resources for fast, offline-capable generator runs
 mkdir -p "$(dirname "$CACHE_DIR")"

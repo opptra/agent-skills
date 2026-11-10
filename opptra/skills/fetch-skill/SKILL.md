@@ -4,6 +4,11 @@ description: Pulls the latest Opptra skills from github.com/opptra/agent-skills 
 disable-model-invocation: true
 ---
 
+
+## Skill version check
+
+Before following this skill, read and follow [Skill freshness](../session/SKILL.md#skill-freshness). Run it once per user request, including when this skill is invoked directly. A route or shared reference within the same request reuses that result. After an update, reread this file and any shared instructions before continuing.
+
 # Fetch skills
 
 Pull `main` from `https://github.com/opptra/agent-skills.git` and point each tool at the skill folders in that checkout. Do not merge, rebase, or discard local changes.
@@ -21,7 +26,7 @@ Stop if the checkout has uncommitted changes or is not on `main`. Tell the devel
 ## Pull and link
 
 ```bash
-git pull --ff-only origin main
+python3 opptra/skills/session/scripts/check_skills.py
 ./install.sh
 ```
 

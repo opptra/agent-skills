@@ -4,6 +4,11 @@ description: Shared Linear ticket continuity rules read by create-app, feature, 
 disable-model-invocation: true
 ---
 
+
+## Skill version check
+
+Before following this skill, read and follow [Skill freshness](../session/SKILL.md#skill-freshness). Run it once per user request, including when this skill is invoked directly. A route or shared reference within the same request reuses that result. After an update, reread this file and any shared instructions before continuing.
+
 # Linear continuity
 
 Plan with the user before creating a Linear issue. Do not create a new Linear ticket on every prompt while still discussing or refining the plan. Check the current Git branch (`git branch --show-current`) first. Ticket identity comes from the branch name or from a ticket id the user gave. Do not read a ticket id from `.sdlc/state.yaml`.
