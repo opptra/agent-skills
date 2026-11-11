@@ -105,7 +105,7 @@ Rollback is a revert on main, not an older image. Push the revert branch to stag
 
 ## Find the owner of a deployment setting
 
-Read the root `service.yaml`, then `AGENTS.md` and its Product contract. Use `odlc status --json` to find `infra_management`, `terraform_roots`, and `promotion_workflow`. Inspect the actual workflow callers under `.github/workflows/`, including custom callers, and follow their manifest and component paths. A missing ownership field means generator ownership.
+Read the root `service.yaml`, then `AGENTS.md` and its Product contract. Use `odlc status --json` to find `infra_management`, `terraform_roots`, and `promotion_workflow`. Inspect the actual workflow callers under `.github/workflows/`, including custom callers, and follow their manifest and component paths. A missing ownership field means generator ownership. The `adoption` value preserves Terraform and workflows during staging rehearsal. Use `adopt-terraform` to verify parity and the rehearsal before switching to `app-owned`.
 
 | Change | App-owned location |
 |---|---|
@@ -114,7 +114,7 @@ Read the root `service.yaml`, then `AGENTS.md` and its Product contract. Use `od
 | App metadata or inputs consumed by tooling | The root or component `service.yaml` named by the caller. Search for readers before moving a field. |
 | Secret payloads | Secret Manager in the relevant environment. In `.env.example`, list variable names with placeholders. |
 
-On an app-owned repo, skip bootstrap phases and use `odlc sync` only to refresh rules. If the recorded generator predates handoff, use the updated CLI with `odlc sync --upgrade` once. Without the updated CLI, verify the generator supports handoff before invoking it on the repo. Treat workflow updates as explicit PRs that preserve the backend bucket, prefix, and Terraform addresses. See [SDLC handoff and promotion](https://github.com/opptra/sdlc-resources/blob/main/docs/infra-handoff.md).
+For `adoption` and `app-owned`, edit the owning files for Terraform changes and use `odlc sync` only to refresh rules. During adoption, routine production releases continue through the current production deploy path. If the recorded generator predates handoff, use the updated CLI with `odlc sync --upgrade` once. Without the updated CLI, verify the generator supports handoff before invoking it on the repo. Treat workflow updates as explicit PRs that preserve the backend bucket, prefix, and Terraform addresses. See [SDLC handoff and promotion](https://github.com/opptra/sdlc-resources/blob/main/docs/infra-handoff.md).
 
 ## Resume
 
