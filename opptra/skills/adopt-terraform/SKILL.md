@@ -67,9 +67,14 @@ Read the ownership and file map in [session](../session/SKILL.md). If Terraform 
    ```
 4. For resources the developer confirmed already exist in `prod_project`, copy the matching `import {}` blocks from `infra/imports.tf.example` into `infra/imports.tf` (removing any block for a resource that does not exist yet).
 
-## 4. Summary and Safe Cutover Steps
+## 4. Review parity and rehearse the complete release
 
-1. Verify staging first. An empty staging project plans creates. An existing Terraform staging deployment should show a no-op for an ownership-only change. Keep its state location and addresses.
-2. Record `infra_management: app-owned` in the repository. Prepare the pinned promotion caller and environment identities using [handoff and promotion](https://github.com/opptra/sdlc-resources/blob/main/docs/infra-handoff.md). Keep deploy triggers and workload-specific migration, traffic, and health checks in the active workflow. Arrange a single production writer at cutover.
-3. For a production import, set the caller's `adoption_image` to the exact live image and match live configuration. Open the promotion PR from `main` into `production` and review the actual production plan. Expect the reviewed imports and zero resource updates, creates, replacements, or deletes. Handle deliberate changes in a later promotion.
-4. Merge the approved production PR to apply via Actions and verify the application and a clean follow-up plan. Retire the old release path and remove the temporary adoption input in a follow-up release.
+Follow [legacy adoption](https://github.com/opptra/sdlc-resources/blob/main/docs/infra-handoff.md#adopt-a-live-production-app). Start with the union of read-only live production inventory, the legacy release entry points and scripts they call, and the proposed Terraform and workflows. Record each item in `docs/terraform-adoption.json`. Cover workloads, triggers, runtime settings, identities and permissions, secret references, data, and release sequencing. Record owner, disposition, and verification evidence. Record verified absence explicitly and surface access gaps. Keep secret payloads out of the report. Have the migration PR reviewer resolve gaps and approve intentional differences.
+
+After generating the initial Terraform and imports, set `infra_management: adoption` and prepare the pinned caller using `odlc setup-promotion service.yaml . --workflow-ref <published-sha> --upgrade`. This preserves Terraform edits during rehearsal and keeps the replacement's production jobs disabled. Leave the legacy production writer active during the rehearsal. On the proposed staging workflow, exercise every required release step and verify workload, trigger, runtime, IAM, secret and data behavior. When applicable, show backup before migration, migration before deployment, and candidate health before traffic switch. Exercise failure paths that should stop a traffic switch. A successful plan alone is insufficient.
+
+Record the successful staging push run ID, commit, and per-item evidence. Change the marker to `app-owned` in the handoff PR, and run `odlc adoption-check --repo <owner/repository>`. The generated caller also verifies the evidence on the handoff PR and on the first production promotion. If the release tree changed, repeat the rehearsal. Preserve existing Terraform state keys and addresses.
+
+## 5. Cut over production
+
+Use the exact live image for the first production import plan. Review expected imports and references with zero resource updates, creates, replacements, or deletes. At cutover, suspend the legacy production writer, merge the reviewed promotion, and verify the application and a clean follow-up plan. Retire the old deploy path and remove the temporary adoption image input. Routine changes use the owning Terraform and workflow files and standard release checks.

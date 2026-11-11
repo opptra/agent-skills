@@ -56,7 +56,7 @@ Offer three paths and one recommendation. Wait for one yes. Do not ask them to t
 |---|---|---|
 | Ship today | They only need a bug or feature merged | Remove `$tmpdir` and stop. Write no files. Tell them to use `bug` or `feature`. |
 | Make the agent safe | They said align, and the host can stay | Recommend this when `deploy.sh`, `vercel.json`, `fly.toml`, or `cloudbuild.yaml` is present, and whenever they did not ask to move the host. Apply the steps in section 3. |
-| Move the host | They want Terraform to replace the current deploy | Follow `../adopt-terraform/SKILL.md` in this same chat. Do not delete `deploy.sh` in the pull request that introduces Terraform. |
+| Move the host | They want Terraform to replace the current deploy | Follow `../adopt-terraform/SKILL.md` in this same chat. Require the three-source parity review and a full staging rehearsal before recording app-owned handoff. Keep the existing production deploy path active during rehearsal. |
 
 Inside Make the agent safe, honor a single exception such as "skip OpenSpec". Do not turn that into a row-by-row interview.
 

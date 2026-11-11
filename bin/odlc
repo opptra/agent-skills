@@ -136,10 +136,17 @@ done
 
 # A pinned engine predating the handoff must never write into an app-owned repo.
 # The manifest format uses a root key and a plain or quoted scalar.
-app_owned() {
-  [[ -f "$1" ]] && LC_ALL=C grep -Eq "^[[:space:]]*infra_management:[[:space:]]*['\"]?app-owned['\"]?([[:space:]]*(#.*)?)$" "$1"
+protected_infra() {
+  local pattern="^[[:space:]]*infra_management:[[:space:]]*['\"]?"
+  [[ -f "$1" ]] || return 1
+  if LC_ALL=C grep -Eq "${pattern}adoption['\"]?([[:space:]]*(#.*)?)$" "$1"; then
+    adopting=1
+    return 0
+  fi
+  LC_ALL=C grep -Eq "${pattern}app-owned['\"]?([[:space:]]*(#.*)?)$" "$1"
 }
 
+adopting=0
 owned=0
 case "$cmd" in
   sync|sync-infra|all|init-runtime|add-data|add-tests|setup-promotion)
@@ -147,7 +154,7 @@ case "$cmd" in
     for arg in "${filtered_args[@]+"${filtered_args[@]}"}"; do
       [[ "$arg" == --* ]] || paths+=("$arg")
     done
-    if app_owned "${paths[0]:-service.yaml}" || app_owned "${paths[1]:-.}/service.yaml"; then
+    if protected_infra "${paths[0]:-service.yaml}" || protected_infra "${paths[1]:-.}/service.yaml"; then
       owned=1
     fi
     ;;
@@ -157,18 +164,18 @@ case "$cmd" in
       target="${filtered_args[0]}"
     fi
     for arg in "${filtered_args[@]+"${filtered_args[@]}"}"; do
-      if [[ "$arg" == --write-imports ]] && app_owned "$target/service.yaml"; then
+      if [[ "$arg" == --write-imports ]] && protected_infra "$target/service.yaml"; then
         owned=1
       fi
     done
     ;;
   check)
-    if app_owned "${filtered_args[0]:-service.yaml}"; then owned=1; fi
+    if protected_infra "${filtered_args[0]:-service.yaml}"; then owned=1; fi
     ;;
   status|next|secrets)
     for arg in "${filtered_args[@]+"${filtered_args[@]}"}"; do
       [[ "$arg" == --* ]] && continue
-      if app_owned "$arg/service.yaml"; then owned=1; fi
+      if protected_infra "$arg/service.yaml"; then owned=1; fi
       break
     done
     if app_owned service.yaml; then owned=1; fi
@@ -198,8 +205,11 @@ else
   fi
 fi
 
-if [[ "$owned" == 1 ]] && ! grep -q '^def app_owns_infra(' "${repo}/scripts/generate.py"; then
-  echo "This app owns its infrastructure. Use odlc $cmd --upgrade with the original arguments to select a handoff-aware engine." >&2
+if [[ "$owned" == 1 ]] && {
+  ! grep -q '^def app_owns_infra(' "${repo}/scripts/generate.py" ||
+  [[ "$adopting" == 1 && ! -f "${repo}/scripts/adoption_check.py" ]];
+}; then
+  echo "This app is rehearsing adoption or owns its infrastructure. Use odlc $cmd --upgrade with the original arguments to select a handoff-aware engine." >&2
   exit 2
 fi
 
