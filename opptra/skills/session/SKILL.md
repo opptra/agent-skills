@@ -92,9 +92,9 @@ After a feature or bug pull request into `main` is open, print this and stop. Su
 Ship card
 main does not deploy.
 Check active staging runs: gh run list --branch staging --limit 1
-Try staging: git push --force-with-lease origin <branch>:staging
-Do not merge main into staging.
-When staging looks right, open a pull request from main into production. That merge deploys production.
+Try staging independently: git push --force-with-lease origin <branch>:staging
+For reviewed staging, inspect the plan and dispatch on staging with its reviewed run ID.
+For production, open a pull request from main into production. Review the production plan and candidate digests before merge.
 ```
 
 On a bug, add this line under the card:
