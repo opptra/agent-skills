@@ -14,8 +14,14 @@ Org-wide skills cover mockups, branding, and one-page dashboards. Engineering sk
 | `change-app` | Infrastructure-only work. Edits checked-in Terraform and workflows after handoff. Generator-owned repositories still use the pinned bootstrap phases. |
 | `adopt-terraform` | Maps live resources to Terraform, verifies staging, and prepares the production cutover and imports. |
 | `align-app` | An existing repository. Prints the scorecard, then offers three paths: ship today, make the agent safe, or move the host. One yes. |
-| `feature` | A Linear feature. Includes coupled Terraform and code changes in one PR after handoff. Generator-owned repositories keep their stacked PR flow. Uses a 2-gate confirmation flow and prints the ship card. |
-| `bug` | A Linear bug. Investigates root cause and writes a failing reproduction test before Gate 1, applies the minimal fix, verifies `.githooks/pre-commit` and `make ci`, opens one PR into `main`, and prints the ship card including the rollback line. |
+| `feature` | Plans and implements a feature, applies the repo's spec and tracker rules, and uses `task-to-pr` to deliver it. |
+| `requirements` | Turns a brief into product requirements and observable acceptance criteria. |
+| `plan` | Splits agreed work into verifiable PR-sized tasks with dependencies. |
+| `test` | Produces evidence for acceptance criteria and repository checks. |
+| `review` | Independently reviews a change and records a verdict for the reviewed revision. |
+| `task-to-pr` | Delivers an agreed task through implementation, verification, review, and PR CI. |
+| `open-pr` | Opens or updates a PR for an existing change with its evidence and risk. |
+| `bug` | Reproduces an issue with a failing check, applies a minimal fix, and uses `task-to-pr` to verify and deliver it. |
 | `add-skill` | A new team skill. Writes `opptra/skills/<name>/SKILL.md` and opens a pull request into `main`. |
 | `modify-skill` | A change to an existing team skill. Edits that skill from the developer's instructions and opens a pull request into `main`. |
 | `linear-continuity` | Shared reference read by the skills above before they create or update a Linear issue (supports `LOCAL-DRAFT` fallback while working locally offline). Do not run it on its own. |
@@ -26,6 +32,12 @@ Org-wide skills cover mockups, branding, and one-page dashboards. Engineering sk
 `opptra/sdlc-resources` stays the library: the mapping, the skeletons, the phase CLI (`scripts/odlc.py`), the Terraform modules, and the workflows. `./install.sh` maintains a local bare cache at `~/.cache/opptra/sdlc-resources.git` so generator runs are instant and work offline.
 
 `main` does not deploy. A push to `staging` deploys staging. A merge into `production` deploys production.
+
+## Delivery in chat and in a factory
+
+Install the same skill bundle for both. Invoke a stage directly or use `task-to-pr` for an agreed task. The [delivery handoff](opptra/skills/session/delivery.md) documents repository discovery, factory inputs and results, and how a run pauses and resumes at approval gates. Aligned apps use their active SDLC conventions. Unaligned apps use their own verified branches, checks, and workflows.
+
+The delivery skills adapt requirements, planning, verification, review, and PR workflows from [Blueprint](https://github.com/owainlewis/blueprint) by Owain Lewis, distributed under the [MIT license](https://github.com/owainlewis/blueprint/blob/main/LICENSE).
 
 ## Cursor
 

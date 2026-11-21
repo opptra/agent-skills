@@ -1,6 +1,6 @@
 ---
 name: opptra
-description: Chooses the Opptra route from a sentence when the developer has not named a skill. Use when someone describes a new app, a bug, a feature, a mockup, a presentation, an email, a dashboard, an alignment, a Terraform move, a capability change, or asks whether they are set up, and does not say which skill to run.
+description: Chooses the Opptra route from a sentence when the developer has not named a skill. Use when someone describes a new app, a bug, a feature, a mockup, a presentation, an email, a dashboard, an alignment, a Terraform move, a capability change, asks to define requirements, plan, verify, review, or deliver a change to a pull request, or asks whether they are set up without naming a skill.
 ---
 
 
@@ -25,6 +25,12 @@ Route: <skill> | Why: <one sentence>
 | An existing repository onto the SDLC standard | `align-app` |
 | `deploy.sh`, Cloud Build, Vercel, Fly, or manual GCP onto Terraform | `adopt-terraform` |
 | A database, bucket, queue, secret, job, cron, region, or workload | `change-app` |
+| Define requirements from a brief | `requirements` |
+| Split agreed work into delivery tasks | `plan` |
+| Verify behavior or acceptance criteria | `test` |
+| Independently review an existing change | `review` |
+| Deliver an agreed task through PR and CI | `task-to-pr` |
+| Open or update a PR for an existing change | `open-pr` |
 | New product behavior | `feature` |
 | Broken or incorrect behavior | `bug` |
 | Fetch or update the team skills | `fetch-skill` |
@@ -34,6 +40,6 @@ Route: <skill> | Why: <one sentence>
 
 A mockup, deck, email, or one-page dashboard is not a new repository. Do not route those to `create-app`.
 
-For a feature or bug that also changes infrastructure, read the ownership map in [session](../session/SKILL.md). App-owned repositories can include both in one PR. Generator-owned repositories use `change-app` and the legacy stacked PR flow. Stay in this chat while continuing the selected route.
+For a feature or bug that also changes infrastructure, read the ownership map in [session](../session/SKILL.md). App-owned repositories can include both in one PR. Generator-owned repositories use `change-app` and the legacy stacked PR flow. For other repositories, follow their actual deployment ownership and workflow. Stay in this chat while continuing the selected route.
 
 If two routes fit and you cannot tell which, ask once.
