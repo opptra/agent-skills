@@ -62,7 +62,7 @@ Inside Make the agent safe, honor a single exception such as "skip OpenSpec". Do
 
 ## 3. Apply the accepted path
 
-Read `infra_management` and the file map in [session](../session/SKILL.md). In an app-owned repo, run read-only checks, preserve the Product contract, and edit the owning files for the approved alignment changes. Use rules-only sync for managed rules. A CI-only alignment of an app on a legacy host does not activate Terraform promotion. Route a requested host cutover to `adopt-terraform`.
+Read `infra_management` and the file map in [session](../session/SKILL.md). In an app-owned repo, run read-only checks, preserve the Product contract, and edit the owning files for the approved alignment changes. Use rules-only sync for managed rules. For a Terraform app adopting deployment IAM, port the pinned caller’s IAM preview, additions, and verified-cleanup jobs while preserving state, component paths and custom hooks. Use `setup-promotion --with-iam` for new callers. Keep existing grants in place and start with empty declarations or an import-only adoption. Configure IAM identities through authorized bind setup. Staging approval happens inside the release run. Production IAM writes happen after promotion approval and merge. Cleanup requires every component’s successful `post_apply` hook. A grant key rename requires a state move. A CI-only alignment of an app on a legacy host does not activate Terraform promotion. Route a requested host cutover to `adopt-terraform`.
 
 Path 1 writes nothing. Path 3 follows `adopt-terraform`. Path 2 does the steps below. If the repo still deploys through `deploy/*.sh`, `vercel.json`, `fly.toml`, or `cloudbuild.yaml`, pass `--ci-only` and leave that deploy path in place.
 
