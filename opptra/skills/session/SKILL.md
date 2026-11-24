@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 ## Skill freshness
 
-At the start of a user request that invokes an Opptra skill, run the shared check using the checkout containing that skill:
+If the factory pinned the provisioned skills revision, use it for the whole run, including nested routes and resume. Otherwise, at the start of a request that invokes an Opptra skill, run the shared check using the checkout containing that skill:
 
 ```bash
 python3 "<skill-directory>/../session/scripts/check_skills.py"
@@ -19,6 +19,10 @@ Resolve `<skill-directory>` from the actual loaded SKILL.md location. The helper
 On `current`, proceed. On `updated`, reread the invoked SKILL.md and any shared instructions, and then proceed. Report `local-development` briefly and use the local instructions for skill development. Report `unverified` when offline or unable to access GitHub and proceed with the installed version. On `busy`, recheck after the other update finishes. On `relink-required`, run `install.sh --skills-only` from that checkout before continuing. A `managed-install` uses the host's plugin update mechanism.
 
 This check updates the skills checkout and links only. Generator commits and app workflow refs follow their own explicit upgrade process. Print the actual skills commit in the route banner. A version check is an instruction the agent executes, so installations need this preflight once before they can check themselves.
+
+## Delivery
+
+Use the [delivery handoff](delivery.md) for repository discovery, review and verification evidence, and approval or resume state in chat and factory jobs.
 
 ## Pins
 
@@ -86,16 +90,15 @@ Run the install when `openspec --version` is missing or is not `${OPENSPEC_VERSI
 
 ## Ship card
 
-After a feature or bug pull request into `main` is open, print this and stop. Substitute the real branch name. Do not run the push, and do not open the production pull request, unless the developer asks.
+After a feature or bug pull request is open, include this for repositories whose active workflows use the Opptra staging and production flow. Other repositories get the release steps established by their own workflows, if known. Substitute the real branch name. Leave release actions to the developer unless the request authorizes them.
 
 ```text
 Ship card
 main does not deploy.
-Check active staging runs: gh run list --branch staging --limit 1
 For a caller with protected_promotions: true, open a PR from <branch> into staging.
-The teammate approving it selects one IAM artifact and each Terraform artifact from the successful plan run. Merge to deploy.
+After the staging plan checks pass, a teammate copies one IAM artifact: <id> line and one Terraform artifact: <id> line per component into the PR approval. Merge to deploy.
 For a legacy caller, follow its direct staging push or reviewed dispatch instructions.
-For production, open a pull request from main into production. Review the production plan and candidate digests. Select the required artifacts in the approval before merging.
+For production, open a separate PR from main into production. Review that environment’s plan and image digests, then select its own artifacts in the approval. Merge to deploy. For protected promotion, a changed plan needs a fresh reviewed promotion PR.
 ```
 
 On a bug, add this line under the card:
@@ -106,7 +109,7 @@ Rollback is a revert on main, not an older image. Release the revert through the
 
 ## Find the owner of a deployment setting
 
-Read the root `service.yaml`, then `AGENTS.md` and its Product contract. Use `odlc status --json` to find `infra_management`, `terraform_roots`, and `promotion_workflow`. Inspect the actual workflow callers under `.github/workflows/`, including custom callers, and follow their manifest and component paths. A missing ownership field means generator ownership. The `adoption` value preserves Terraform and workflows during staging rehearsal. Use `adopt-terraform` to verify parity and the rehearsal before switching to `app-owned`.
+Read the root `service.yaml`, then `AGENTS.md` and its Product contract. Use `odlc status --json` to find `infra_management`, `terraform_roots`, and `promotion_workflow`. Inspect the actual workflow callers under `.github/workflows/`, including custom callers, and follow their manifest and component paths. In an SDLC-managed manifest, an omitted ownership field defaults to generator ownership. When the repo lacks a manifest or active generator evidence, use [repository context](delivery.md#repository-context) to trace ownership. The `adoption` value preserves Terraform and workflows during staging rehearsal. Use `adopt-terraform` to verify parity and the rehearsal before switching to `app-owned`.
 
 | Change | App-owned location |
 |---|---|

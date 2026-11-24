@@ -11,12 +11,12 @@ Before following this skill, read and follow [Skill freshness](../session/SKILL.
 
 # Linear continuity
 
-Plan with the user before creating a Linear issue. Do not create a new Linear ticket on every prompt while still discussing or refining the plan. Check the current Git branch (`git branch --show-current`) first. Ticket identity comes from the branch name or from a ticket id the user gave. Do not read a ticket id from `.sdlc/state.yaml`.
+Plan with the user before creating a Linear issue. Do not create a new Linear ticket on every prompt while still discussing or refining the plan. Check the current Git branch (`git branch --show-current`) first. Ticket identity comes from the branch name, an issue the user supplied, or the trusted [factory task record](../session/delivery.md). In a detached factory workspace, prefer the supplied issue and reconcile its exact branch and PR before continuing. Return unresolved issue identity or approval as a pending action. A detached checkout does not imply that the job needs a new issue. Do not read a ticket id from `.sdlc/state.yaml`.
 
 - If a ticket branch is already checked out (`feat/<ticket-id>-...`, `fix/<ticket-id>-...`, or `infra/<ticket-id>-...`) and the new ask is related to that same ticket, reuse that Linear issue. Append the new requirements and spec updates only when they are not already on the issue, and keep working on the current branch.
-- If a ticket branch is checked out and it is unclear whether the new ask belongs to that ticket or is a separate task, ask the user whether to add it to the existing Linear issue or switch to `main` and create or use a new Linear issue.
-- If on `main` and the user gave a ticket id, read that Linear issue.
-- If on `main` with no ticket id given, agree on the overall plan with the user first, then create one Linear issue and push the agreed requirements, acceptance criteria, and spec summary to that Linear issue.
+- If a ticket branch is checked out and it is unclear whether the new ask belongs to that ticket or is a separate task, ask the user whether to add it to the existing Linear issue or switch to the resolved default branch and create or use a new Linear issue.
+- If on the resolved default branch and the user gave a ticket id, read that Linear issue.
+- If on the resolved default branch with no ticket id given, agree on the overall plan with the user first, then create one Linear issue and push the agreed requirements, acceptance criteria, and spec summary to that Linear issue.
 - **Local-only / offline fallback (`LOCAL-DRAFT`):** If the developer is scaffolding a new app locally (`create-app` before GitHub repo creation) or working offline and Linear MCP is not connected yet, allow local progress using placeholder `LOCAL-DRAFT` in `.sdlc/intent.yaml`, and require connecting Linear and resolving a real ticket id before pushing a branch or opening a pull request.
 
 Do not invent a real-looking ticket id (such as `OPP-123`). Only use a real Linear issue id from Linear or `LOCAL-DRAFT` prior to remote push.

@@ -12,7 +12,11 @@ Before following this skill, read and follow [Skill freshness](../session/SKILL.
 
 Use this skill for infrastructure-only work. For a feature or bug with coupled infrastructure, follow that skill and include the changes in the same PR when the app owns its infrastructure.
 
-Before you edit files, read Pins in `../session/SKILL.md`, print the Route Banner with those two lines, tell the developer which owning files will change and which files will be generated if the repo still uses the generator, and wait for a yes (**Gate 1**). After running the phase scripts and verifying `.githooks/pre-commit` and `make ci`, show the commit message, file list, branch name, and pull request title/body together in one prompt and wait for a yes (**Gate 2**).
+Before you edit files, read Pins in `../session/SKILL.md`, print the Route Banner with those two lines, tell the developer which owning files will change and which files will be generated if the repo still uses the generator, and wait for a yes (**Gate 1**). After completing the applicable changes and repository checks, show the commit message, file list, branch name, and pull request title/body together in one prompt and wait for a yes (**Gate 2**). In the factory, consume action-scoped approval at either gate or return the pending action using the [delivery handoff](../session/delivery.md).
+
+## Repositories with an existing non-SDLC deployment path
+
+Read [repository context and delivery handoff](../session/delivery.md) first. If discovery establishes that a workflow, deployment script, or Terraform root owns the setting outside of SDLC generation, edit that owner after Gate 1. Follow the repository's own branch, tracker, and checks. Use [test](../test/SKILL.md) and [open-pr](../open-pr/SKILL.md) with the applicable Gate 2 approval. If the owner cannot be determined, return the missing evidence. Alignment or adoption is a separate request.
 
 ## App-owned repositories
 
@@ -28,7 +32,7 @@ Script-Owned Paths: infra/, .github/workflows/, managed rule blocks in AGENTS.md
 ```
 
 1. **Plan first and resolve the Linear ticket.** Agree the capability or schedule change with the developer, then read and follow `../linear-continuity/SKILL.md`. When you create or update the issue, include the planned `service.yaml` changes. Do not invent a ticket id.
-2. Read `service.yaml`. If `service.yaml` is missing, stop and run `align-app` first.
+2. Read `service.yaml`. Use generator phases only when the manifest and active ownership support them. If no manifest exists, use the repository context above.
 3. Run Generator checkout from `../session/SKILL.md`. It sets `$tmpdir` and `$tmpdir/sdlc`. Reuse `generator_sha` when `.sdlc/state.yaml` has one. Clone `main` only when it is missing or the developer asks to upgrade the generator.
 
 ## 2. Apply in Phases
