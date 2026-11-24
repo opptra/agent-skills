@@ -10,7 +10,7 @@ Before following this skill, read and follow [Skill freshness](../session/SKILL.
 
 # Feature
 
-`main` is the default branch and does not deploy. You do not merge. You do not push `staging` or open the production pull request unless the developer asks. A staging try is a direct push of the feature branch to `staging` (`git push --force-with-lease origin <branch>:staging`). Do not merge `main` into `staging`. Production is only a pull request from `main` into `production`.
+`main` is the default branch and does not deploy. Read the active caller and follow the shared Ship card for a protected staging PR or the legacy staging path. Production is a PR from `main` into `production`. Leave release actions to the developer unless asked.
 
 Use a streamlined **2-Gate confirmation flow**:
 - **Gate 1 (Plan & OpenSpec):** Read `../session/SKILL.md`, print the Route Banner with its Pins lines, draft/update the OpenSpec (when `standard` or `migration`), present the plan + spec summary, and wait for a yes before editing product files.
