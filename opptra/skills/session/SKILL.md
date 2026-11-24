@@ -90,21 +90,21 @@ Run the install when `openspec --version` is missing or is not `${OPENSPEC_VERSI
 
 ## Ship card
 
-After a feature or bug pull request is open, include this for repositories whose active workflows use the Opptra staging and production flow. Other repositories get the release steps established by their own workflows, if known. Substitute the real branch name. Do not run the push, and do not open the production pull request, unless the developer asks.
+After a feature or bug pull request is open, include this for repositories whose active workflows use the Opptra staging and production flow. Other repositories get the release steps established by their own workflows, if known. Substitute the real branch name. Leave release actions to the developer unless the request authorizes them.
 
 ```text
 Ship card
 main does not deploy.
-Check active staging runs: gh run list --branch staging --limit 1
-Try staging independently: git push --force-with-lease origin <branch>:staging
-For reviewed staging, inspect the plan and dispatch on staging with its reviewed run ID.
-For production, open a pull request from main into production. Review the production plan and candidate digests before merge.
+For a caller with protected_promotions: true, open a PR from <branch> into staging.
+After the staging plan checks pass, a teammate copies one IAM artifact: <id> line and one Terraform artifact: <id> line per component into the PR approval. Merge to deploy.
+For a legacy caller, follow its direct staging push or reviewed dispatch instructions.
+For production, open a separate PR from main into production. Review that environment’s plan and image digests, then select its own artifacts in the approval. Merge to deploy. For protected promotion, a changed plan needs a fresh reviewed promotion PR.
 ```
 
 On a bug, add this line under the card:
 
 ```text
-Rollback is a revert on main, not an older image. Push the revert branch to staging if you need to see it, then open main into production.
+Rollback is a revert on main, not an older image. Release the revert through the active staging path if needed, then open main into production.
 ```
 
 ## Find the owner of a deployment setting

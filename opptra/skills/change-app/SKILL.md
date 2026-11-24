@@ -20,7 +20,7 @@ Read [repository context and delivery handoff](../session/delivery.md) first. If
 
 ## App-owned repositories
 
-Read **Find the owner of a deployment setting** in [session](../session/SKILL.md). Reuse the Linear ticket when it covers the request. For standalone work, use `infra/<ticket>-<slug>`. Edit the owning Terraform, environment inputs, or workflow caller. Preserve state keys and resource addresses, and update `.env.example` for new runtime names. Run hooks and `make ci`, review the Terraform plan for the affected environment, and open the infrastructure PR. Use the developer's normal staging and promotion flow.
+Read **Find the owner of a deployment setting** in [session](../session/SKILL.md). Reuse the Linear ticket when it covers the request. For standalone work, use `infra/<ticket>-<slug>`. Edit the owning Terraform, environment inputs, or workflow caller. Preserve state keys and resource addresses, and update `.env.example` for new runtime names. Run hooks and `make ci`, review the Terraform plan for the affected environment, and open the infrastructure PR. Use the active caller’s staging and promotion flow. With protected promotion, include delegated project grants under `infra/iam/` in the same change. Open a reviewed candidate PR into `staging`, then promote from `main` to `production` with its own reviewed artifacts.
 
 ## 1. Route Banner & Understand for generator-owned repositories
 

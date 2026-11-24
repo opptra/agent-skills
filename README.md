@@ -31,7 +31,7 @@ Org-wide skills cover mockups, branding, and one-page dashboards. Engineering sk
 
 `opptra/sdlc-resources` stays the library: the mapping, the skeletons, the phase CLI (`scripts/odlc.py`), the Terraform modules, and the workflows. `./install.sh` maintains a local bare cache at `~/.cache/opptra/sdlc-resources.git` so generator runs are instant and work offline.
 
-`main` does not deploy. A push to `staging` deploys staging. A merge into `production` deploys production.
+`main` integrates changes. For apps with protected promotion, open a candidate PR into `staging` and a separate PR from `main` into `production`. A teammate approves the artifacts for that environment, then the merge deploys. Legacy callers use their existing staging trigger. See the [ship card](opptra/skills/session/SKILL.md#ship-card).
 
 ## Delivery in chat and in a factory
 

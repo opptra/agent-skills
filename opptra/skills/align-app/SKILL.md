@@ -62,7 +62,7 @@ Inside Make the agent safe, honor a single exception such as "skip OpenSpec". Do
 
 ## 3. Apply the accepted path
 
-Read `infra_management` and the file map in [session](../session/SKILL.md). In an app-owned repo, run read-only checks, preserve the Product contract, and edit the owning files for the approved alignment changes. Use rules-only sync for managed rules. A CI-only alignment of an app on a legacy host does not activate Terraform promotion. Route a requested host cutover to `adopt-terraform`.
+Read `infra_management` and the file map in [session](../session/SKILL.md). For app-owned repositories, preserve the Product contract and edit the owning files. Use rules-only sync for managed rules. When enabling deployment IAM, port the pinned caller’s reviewed staging and production PRs, preflight, IAM and cleanup jobs. Preserve state, component paths, and hooks. Configure protected branch rules and identities through authorized setup. Start with empty declarations or an import-only grant pilot. Cleanup requires every component’s successful `post_apply`. CI-only alignment keeps the current deploy path. Route a host cutover to `adopt-terraform`.
 
 Path 1 writes nothing. Path 3 follows `adopt-terraform`. Path 2 does the steps below. If the repo still deploys through `deploy/*.sh`, `vercel.json`, `fly.toml`, or `cloudbuild.yaml`, pass `--ci-only` and leave that deploy path in place.
 
@@ -95,6 +95,6 @@ Say which scorecard rows changed, whether OpenSpec is initialized, and whether L
 2. Connect anything still red on OpenSpec or Linear before the next `/feature` or `/bug`.
 3. When this alignment added a deploy workflow, explain `scripts/bind-staging.sh` and `scripts/bind-production.sh`. Staging bind needs IAM on `opptra-staging` only. Production bind goes to someone who can change IAM in `prod_project`. Neither script deploys, and neither protects branches. Do not run either script unless they ask. Do not run `protect-branches.sh`.
 4. If `origin` is missing, ask once. On yes, create a private `opptra/<name>` the way `create-app` does, and push `main`, `staging`, and `production`. If they paste an existing URL, set the remote and push those branches. Do not force-push. Record the slug with Generator checkout and `python3 "$tmpdir/sdlc/scripts/sdlc.py" set-github-repo "<url>" .`, then delete `$tmpdir`.
-5. After `scripts/bind-staging.sh` has succeeded, try staging by pushing a branch directly to `staging`. Do not merge `main` into `staging`. Production is a pull request from `main` into `production`. Print the ship card from `../session/SKILL.md`.
+5. Once staging access is set up, follow the shared ship card. Use a candidate PR into `staging` for protected promotion. A legacy caller follows its current staging path. Production is a PR from `main` into `production`.
 6. Move laptop or other legacy deploy scripts (`deploy.sh`, `cloudbuild.yaml`, `vercel.json`, `fly.toml`) to Terraform with `/adopt-terraform` before deleting them.
 7. Port or fix product behaviour with `/feature` and `/bug`. Those skills expect OpenSpec and a real Linear issue.
