@@ -92,15 +92,16 @@ After a feature or bug pull request into `main` is open, print this and stop. Su
 Ship card
 main does not deploy.
 Check active staging runs: gh run list --branch staging --limit 1
-Try staging independently: git push --force-with-lease origin <branch>:staging
-For reviewed staging, inspect the plan and dispatch on staging with its reviewed run ID.
-For production, open a pull request from main into production. Review the production plan and candidate digests before merge.
+For a caller with protected_promotions: true, open a PR from <branch> into staging.
+The teammate approving it selects one IAM artifact and each Terraform artifact from the successful plan run. Merge to deploy.
+For a legacy caller, follow its direct staging push or reviewed dispatch instructions.
+For production, open a pull request from main into production. Review the production plan and candidate digests. Select the required artifacts in the approval before merging.
 ```
 
 On a bug, add this line under the card:
 
 ```text
-Rollback is a revert on main, not an older image. Push the revert branch to staging if you need to see it, then open main into production.
+Rollback is a revert on main, not an older image. Release the revert through the active staging path if needed, then open main into production.
 ```
 
 ## Find the owner of a deployment setting

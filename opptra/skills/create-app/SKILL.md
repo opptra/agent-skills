@@ -109,7 +109,7 @@ python3 "$tmpdir/sdlc/scripts/sdlc.py" check "<target-dir>/service.yaml"
    - If any lint, formatting, or test issue is auto-resolvable, fix it immediately and re-run until `.githooks/pre-commit` and `make ci` exit `0`.
    - If a check fails due to something that cannot be resolved without user input, explain the exact failure and ask the developer whether to provide the input now or disable that specific check (`run_tests: false` or `run_lint: false`) in `service.yaml` (recording the reason under `unmet`).
 4. Push the agreed requirements and blueprint summary to the Linear issue.
-5. After verification, set `infra_management: app-owned` in the app's root `service.yaml`. For Cloud Run services and jobs, run `odlc setup-promotion service.yaml . --workflow-ref <published-sdlc-commit> --replace-bootstrap-workflows --with-iam` from the app. Review the generated state locations, caller, and helper scripts. Configure the optional IAM planner/applier through the environment bind commands with `--with-iam` when the developer authorizes setup. Keep initial IAM declarations empty until the delegated roles, member list and protected environments are configured. Include feature resources and grants together in the feature PR. Staging IAM waits for environment approval within the release. Production IAM applies after the approved promotion PR merges. Configure a `post_apply` verification hook on every component before allowing cleanup of retired grants. Follow the published SDLC revision’s deployment IAM guide. VM workers keep their VM deploy caller. Config-only apps have no Terraform promotion. Run `odlc sync service.yaml .` for the app-owned rules and remove the temporary generator checkout. When the CLI is unavailable, use the same commands through the handoff-aware generator checkout.
+5. After verification, set `infra_management: app-owned`. For Cloud Run services and jobs, run `odlc setup-promotion service.yaml . --workflow-ref <published-sdlc-commit> --replace-bootstrap-workflows --with-iam`. Review the generated state locations and caller. Coordinate authorized environment and bind setup and require peer approval, stale approval dismissal, and `Terraform promotion review` on `staging` and `production`. Start with empty IAM declarations until delegation is configured. Release through reviewed PRs for both environments. Include needed grants with the feature and configure `post_apply` on every component before using cleanup. VM workers keep their deploy caller and config-only apps use CI. Run `odlc sync service.yaml .` for the app-owned rules and remove the temporary generator checkout.
 6. Configure the deployment and planning environments using [handoff and promotion](https://github.com/opptra/sdlc-resources/blob/main/docs/infra-handoff.md). Initialize branch protections and use the first staged push after credentials and registry setup.
 
 ## 4. Summary scorecard, then next steps
@@ -118,7 +118,7 @@ Do not stop after `status --table` alone. Add a second table, **Built and still 
 
 | Item | In the scaffold? | Why | What you do next |
 |---|---|---|---|
-| Example: eight Cloud Run jobs | Yes | The plan listed them, so the scaffold created the jobs, commands, and crons | Try them with a direct push to staging after bind-staging.sh |
+| Example: eight Cloud Run jobs | Yes | The plan listed them, so the scaffold created the jobs, commands, and crons | Try them through a staging PR after the authorized setup |
 | Example: laptop handler code | No | The scaffold is the platform shell. Porting behaviour is a feature | One `/feature` pull request per cutover slice |
 
 Mark each row Yes or No. A Yes row says why it was included. A No row says it was left out on purpose and what the next pull request is. Include `unmet` items as No.
@@ -162,10 +162,10 @@ Say what was created: app name, directory, workloads, data store, bucket, queue,
      ./scripts/bind-production.sh opptra/<name> <prod_project>
    (Then run the two `gh variable set` commands it prints.)
    ```
-   These scripts cover the legacy deployer setup. For the promotion workflow, the platform administrator sets the separate plan and apply identities described in the handoff guide. A direct push to `staging` deploys staging. A pull request from `main` into `production` is the only deploy that comes from `main`. Do not merge `main` into `staging`. The steps are in `docs/bind.md` of `opptra/sdlc-resources`.
+   The platform administrator configures the separate plan and apply identities and protected promotion branches. Use a candidate PR into `staging` and a PR from `main` into `production`. Consult the published SDLC revision’s `docs/bind.md`.
 4. **Build the first feature slice locally with `/feature`.**
    The scaffold is the platform shell. Port or build product behaviour one `/feature` pull request at a time.
-5. **Try staging only after bind-staging has succeeded and they ask.** Push the branch directly to `staging` after configuring the promotion environments and registry. Confirm the jobs, schedules, and webhook match Terraform. A disabled job must have no Scheduler entry. Merging to `main` does not update staging. Then print the ship card from `../session/SKILL.md`.
+5. **Try staging after authorized setup and when requested.** Open a candidate PR into `staging` for the protected caller. The approved merge deploys. Confirm jobs, schedules, and webhooks match Terraform. Follow the shared ship card.
 6. **Put secret values into Secret Manager and close `unmet` items.** The scaffold only created secret ids. Close each `unmet` item (such as a data import or project billing budget) in its own pull request.
 
 If those feature slices are already known, ask **once**: pause for review after each slice, or run each slice through its checks without stopping.
